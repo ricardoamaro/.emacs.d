@@ -1,10 +1,10 @@
 # My emacs settings
 
-A dynamic set of emacs settings. Day by day improving settings.
+A dynamic set of emacs configurations improving Day by day.
 
 ## Setup
 
-Go to your home and grab the code:
+Go to your home folder and grab the code:
 
     git clone git://github.com/ricardoamaro/.emacs.d.git
 
