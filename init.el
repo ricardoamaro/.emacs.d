@@ -176,7 +176,7 @@
 ;; set a default font to Droid
 (when (member "Droid Sans Mono" (font-family-list))
   (set-face-attribute 'default nil :font "Droid Sans Mono")
-  (set-frame-font "Droid Sans Mono-12"))  ; set font for current window
+  (set-frame-font "Droid Sans Mono-11"))  ; set font for current window
 
 ;; keep custom setting in external file
 (setq-default custom-file "~/.emacs.d/custom.el")
@@ -184,6 +184,13 @@
 
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
 (load-theme 'monokai)
+
+(tool-bar-mode 0)
+;;(menu-bar-mode 1)
+(set-scroll-bar-mode nil)
+(setq inhibit-startup-screen t)
+(setq initial-scratch-message nil)
+(setq initial-major-mode 'text-mode)
 
 (provide 'init)
 ;;; init.el ends here
