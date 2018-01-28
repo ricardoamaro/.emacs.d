@@ -161,17 +161,17 @@
 ;; mouse support
 (xterm-mouse-mode 1)
 
-;; 2 space identation
+;; 2 space identation and safe theme
 (custom-set-variables
  '(indent-tabs-mode nil)
  '(tab-width 2)
  '(standard-indent 2)
  '(js-indent-level 2)
  '(sh-indentation 2)
-  '(custom-safe-themes
+ '(custom-safe-themes
    (quote
     ("53f97243218e8be82ba035ae34c024fd2d2e4de29dc6923e026d5580c77ff702" default)))
-)
+ )
 
 ;; set a default font to Droid
 (when (member "Droid Sans Mono" (font-family-list))
