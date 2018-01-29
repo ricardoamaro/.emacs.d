@@ -190,6 +190,26 @@
   ;;(spaceline-all-the-icons-theme)
   (spaceline-compile)
   )
+
+(defun mydesktop()
+  (setq dotspacemacs-auto-resume-layouts t
+        desktop-dirname             "~/.emacs.d/"
+        desktop-base-file-name      ".emacs.desktop"
+        desktop-base-lock-name      "lock"
+        desktop-path                (list desktop-dirname)
+        desktop-save                1
+        desktop-files-not-to-save   "^$" ;reload tramp paths
+        desktop-load-locked-desktop 1
+        desktop-auto-save-timeout   30)
+  (setq your-own-path desktop-dirname)
+  (if (file-exists-p
+       (concat your-own-path desktop-base-file-name))
+      (desktop-read your-own-path))
+  (add-hook 'kill-emacs-hook
+            `(lambda ()
+               (desktop-save ,your-own-path t)))
+  (desktop-save-mode 1)
+  )
 ;;; End Custom functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; show the function you are in
@@ -235,8 +255,7 @@
 
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;(mytabbar)
+(mydesktop)
 (add-hook 'window-setup-hook #'mytabbar)
 (mycpp)
 ;;(mycursor)

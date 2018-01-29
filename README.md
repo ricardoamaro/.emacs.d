@@ -22,3 +22,7 @@ Emacs can be installed on every OS outhere [Get Emacs](https://www.gnu.org/softw
 ## Tips for using these emacs settings
 
 TBD
+
+## Pictures or it didn't happen
+
+![Emacs Screenshot](./screenshot.png)
