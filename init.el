@@ -39,7 +39,7 @@
         ;; git/github
         magit
         magithub
-        git-gutter+ git-gutter-fringe+
+        git-gutter git-gutter-fringe
         ;; python related packages
         jedi
         pytest
@@ -147,7 +147,6 @@
   (custom-set-variables
    '(blink-cursor-mode t))
   )
-
 (defun mycompany()
   (require 'company)
   ;; company is the completion backend
@@ -169,8 +168,13 @@
   )
 
 (defun mygit()
-  ;; global git-gutter
-  (global-git-gutter+-mode 1)
+  ;; You need to install fringe-helper.el
+  (require 'git-gutter-fringe)
+  ;; Please adjust fringe width if your own sign is too big.
+  (setq-default left-fringe-width  20)
+  (setq-default right-fringe-width 20)
+  (setq git-gutter-fr:side 'left-fringe)
+  (global-git-gutter-mode 1)
   (load-library "magit")
   ;; (load-library "magithub")
   ;; (magithub-feature-autoinject t)
