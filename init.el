@@ -103,7 +103,7 @@
                       :underline t
                       :box '(:line-width 5 :color "gray75" :style nil))
   (set-face-attribute 'tabbar-button nil
-                      :box '(:line-width1 :color "gray20" :style nil))
+                      :box '(:line-width 1 :color "gray20" :style nil))
   (set-face-attribute 'tabbar-separator nil
                       :background "gray20" :height 0.5)
   (setq tool-bar-border 0)
