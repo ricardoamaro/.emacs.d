@@ -22,7 +22,7 @@
         rtags
         irony
         helm helm-company helm-flyspell helm-rtags
-        flycheck flycheck-pos-tip flycheck-irony
+        flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
         rainbow-mode rainbow-delimiters
         smartparens
         spaceline
@@ -47,7 +47,9 @@
         noctilux-theme
         dracula-theme
         monokai-theme
-        yasnippet)
+        yasnippet
+        yasnippet-snippets
+        )
       )
 
 ;; Add Melpa as the default Emacs Package repository
