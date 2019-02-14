@@ -23,7 +23,7 @@
      rtags ggtags
      irony
      helm helm-swoop helm-company helm-flyspell helm-rtags helm-gtags
-     flycheck flycheck-pos-tip flycheck-irony
+     flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
      rainbow-mode rainbow-delimiters
      smartparens
      spaceline
@@ -432,3 +432,4 @@
 ;;; init.el ends here
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
