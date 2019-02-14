@@ -68,13 +68,13 @@
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 (add-to-list 'package-archives
-  '("gnu" . "https://elpa.gnu.org/packages/") t)
+  '("gnu" . "http://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives
-  '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives
-	'("melpa" . "https://melpa.org/packages/") t)
-;; (add-to-list 'package-archives
-;;  '("marmalade" . "https://marmalade-repo.org/packages/") t)
+	'("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives
+  '("marmalade" . "https://marmalade-repo.org/packages/") t)
 
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
@@ -402,7 +402,12 @@
 (setq frame-title-format '("%f   (" invocation-name "@" system-name " | %m)") )
 (tool-bar-mode 0)
 (menu-bar-mode 0)
-(set-scroll-bar-mode nil)
+
+(if (display-graphic-p)
+    (progn
+      (tool-bar-mode -1)
+      (scroll-bar-mode -1)))
+
 (setq inhibit-startup-screen 1)
 (setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
