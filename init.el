@@ -14,9 +14,9 @@
      ;; evil
      ;; evil-leader
      company
-     company-jedi company-anaconda  company-irony company-tern
-     company-rtags company-irony company-irony-c-headers 
-     company-php company-shell
+     company-jedi company-anaconda company-irony company-tern
+     company-rtags company-irony company-irony-c-headers
+     company-php company-shell company-web
      cmake-ide
      ;; auto-complete auto-complete-clang
      google-c-style
@@ -32,10 +32,12 @@
      mode-icons
      ;;all-the-icons
      async
-     projectile 
+     projectile
      which-key
      popup
      markdown-mode
+     web-mode
+     json-mode
      ;; git/github
      magit
      magithub
@@ -65,11 +67,11 @@
 
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
-(add-to-list 'package-archives 
+(add-to-list 'package-archives
   '("gnu" . "https://elpa.gnu.org/packages/") t)
-(add-to-list 'package-archives 
+(add-to-list 'package-archives
   '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-(add-to-list 'package-archives 
+(add-to-list 'package-archives
 	'("melpa" . "https://melpa.org/packages/") t)
 ;; (add-to-list 'package-archives
 ;;  '("marmalade" . "https://marmalade-repo.org/packages/") t)
@@ -87,7 +89,7 @@
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun my/themes-reset ()
-  "reset themes"
+  "Reset themes."
   (interactive)
   (dolist (i custom-enabled-themes)
     (disable-theme i))
@@ -99,7 +101,7 @@
   )
 
 (defun my/themes-dark()
-  "apply dark themes values"
+  "Apply dark themes values."
   (interactive)
   ;; remove spacemacs background
   (my/themes-reset)
@@ -162,13 +164,13 @@
 (defun my/tabbar()
   "Create a nice tabbar grouped by projectile project"
   (interactive)
+  (require 'tabbar-ruler)
   (custom-set-variables '(tabbar-separator (quote (0.5))))
   (setq tabbar-ruler-global-tabbar 1)    ; get tabbar
   (setq tabbar-ruler-excluded-buffers
     '("*Messages*" "*Completions*" "*ESS*" "*Packages*" "*log-edit-files*"
        "*helm-mini*" "*helm-mode-describe-variable*" "*Minibuf-0*" "*Minibuf-1*"
        "*Echo Area 0" "Echo Area 1*" "*which-key*"))
-  (require 'tabbar-ruler)
   (run-hooks 'tabbar-load-hook)
   (set-face-attribute 'tabbar-default nil
     :background "gray20" :foreground "gray60"
@@ -205,7 +207,7 @@
   )
 
 (defun my/cpp ()
-  "Setup cmake-ide & rtags"
+  "Setup cmake-ide & rtags."
   (interactive)
   ;; Load rtags and start the cmake-ide-setup process
   (require 'rtags)
@@ -232,6 +234,7 @@
 
 (defun my/python ()
   ;; various settings for Jedi
+  (interactive)
   (setq
     jedi:complete-on-dot t
     jedi:setup-keys t
@@ -259,6 +262,7 @@
   )
 
 (defun my/company()
+  (interactive)
   (require 'company)
   ;; company is the completion backend
   (global-company-mode t)
@@ -270,35 +274,34 @@
     '(progn
        (define-key company-mode-map (kbd "C-:") 'helm-company)
        (define-key company-active-map (kbd "C-:") 'helm-company)))
-  (setq company-backends '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode
-                             company-semantic company-files company-ac-php-backend
-                             company-elisp company-inf-ruby company-anaconda company-robe
-                             company-gtags company-rtags company-irony-c-headers
-                             company-web-html company-web-jade company-web-slim
-                             company-go company-irony company-clang company-keywords
-                             company-cmake company-css company-yasnippet)
-                            (company-dabbrev company-dabbrev-code)))
+  (setq company-backends '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic company-files company-ac-php-backend company-elisp company-inf-ruby company-anaconda company-robe company-gtags company-rtags company-irony-c-headers company-web company-web-html company-web-jade company-web-slim company-go company-irony company-clang company-keywords company-cmake company-css company-yasnippet)
+(company-dabbrev company-dabbrev-code)))
   ;; python specific stuff
   (require 'company-jedi)
   )
 
 (defun my/helm()
+  (interactive)
   (autoload 'helm-company "helm-company") ;; Enable helm company
   )
 
 (defun my/git()
+  (interactive)
   ;; You need to install fringe-helper.el
   (require 'diff-hl)
   (global-diff-hl-mode 1)
   (diff-hl-flydiff-mode 1)
-  (diff-hl-margin-minor-mode 1)
-  (setq-default left-fringe-width  20)
-  (setq-default right-fringe-width 20)
+  ;;(diff-hl-margin-minor-mode 1)
+  (setq-default left-fringe-width  5)
+  (setq-default right-fringe-width 5)
+  (fringe-mode '( 3 . 3))
+  (setq-default linum-format " %2d " )
   (load-library "magit")
   (global-set-key "\C-xg" 'magit-status)
   )
 
 (defun my/spaceline()
+  (interactive)
   ;; enable spaceline
   (require 'spaceline)
   (require 'spaceline-config)
@@ -306,26 +309,6 @@
   (spaceline-compile)
   )
 
-
-(defun my/desktop()
-  (setq dotspacemacs-auto-resume-layouts t
-    desktop-dirname             "~/.emacs.d/"
-    desktop-base-file-name      ".emacs.desktop"
-    desktop-base-lock-name      "lock"
-    desktop-path                (list desktop-dirname)
-    desktop-save                1
-    desktop-files-not-to-save   "^$" ;reload tramp paths
-    desktop-load-locked-desktop 1
-    desktop-auto-save-timeout   30)
-  (setq your-own-path desktop-dirname)
-  (if (file-exists-p
-        (concat your-own-path desktop-base-file-name))
-    (desktop-read your-own-path))
-  (add-hook 'kill-emacs-hook
-    `(lambda ()
-       (desktop-save ,your-own-path t)))
-  (desktop-save-mode 1)
-  )
 ;;; End Custom functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; show the function you are in
@@ -341,8 +324,6 @@
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'prog-mode-hook #'rainbow-mode)
 
-;; (global-auto-complete-mode 1)
-
 ;; Check for errors
 (require 'flycheck)
 (global-flycheck-mode 1)
@@ -352,7 +333,7 @@
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "C-s") #'helm-swoop)
+(global-set-key (kbd "M-s") #'helm-swoop)
 (helm-mode 1)
 
 ;; enable yasnippet
@@ -360,18 +341,20 @@
 (yas-global-mode 1)
 (yas-reload-all)
 
-;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setenv "SHELL" "/bin/bash")
-(my/desktop)
-(add-hook 'window-setup-hook #'my/tabbar)
+(defun my/window()
+(my/cursor)
+(my/tabbar))
 (my/cpp)
 (my/python)
+(my/company)
 (my/themes-dark)
 (my/git)
 (my/helm)
-(my/company)
-(my/cursor)
+(my/window)
+(add-hook 'after-change-major-mode-hook 'my/window)
 
 ;; cua mode
 (cua-mode 1)
@@ -409,27 +392,24 @@
 
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
 (load-theme 'darkokai)
-(setq monokai-distinct-fringe-background 1)
 
-(fringe-mode '(4 . 4))
-(setq-default linum-format " %2d " )
-
-(tool-bar-mode 1)
+;; Put file path on title bar
+(setq frame-title-format '("%f   (" invocation-name "@" system-name " | %m)") )
+(tool-bar-mode 0)
 (menu-bar-mode 0)
-;;(set-scroll-bar-mode nil)
+(set-scroll-bar-mode nil)
 (setq inhibit-startup-screen 1)
 (setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
 
 (with-eval-after-load 'yasnippet
-  (setq yas-prompt-functions '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt))
-  )
+   (setq yas-prompt-functions
+ 	'(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
 
 ;; last lines
 (my/spaceline)
 (provide 'init)
 
 ;;; init.el ends here
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
