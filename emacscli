@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# exec emacsclient -t $@
+/usr/bin/emacsclient -t $@ || /usr/bin/emacsclient -t --alternate-editor="" $@
+
