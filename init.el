@@ -10,50 +10,70 @@
 ;;; Code:
 (defvar my-packages)
 (setq my-packages
-      '(;; generally useful packages
-        evil
-        evil-leader
-        company
-        company-jedi company-irony
-        company-php company-shell company-rtags
-        cmake-ide
-        auto-complete auto-complete-clang
-        google-c-style
-        rtags
-        irony
-        helm helm-company helm-flyspell helm-rtags
-        flycheck flycheck-pos-tip flycheck-irony
-        rainbow-mode rainbow-delimiters
-        smartparens
-        spaceline
-        spaceline-all-the-icons
-        tabbar-ruler
-        mode-icons
-        ;;all-the-icons
-        async
-        highlight-symbol
-        auto-highlight-symbol
-        which-key
-        popup
-        markdown-mode
-        ;; git/github
-        magit
-        magithub
-        git-gutter git-gutter-fringe
-        ;; python related packages
-        jedi
-        pytest
-        ;; themes
-        noctilux-theme
-        dracula-theme
-        monokai-theme
-        yasnippet)
-      )
+  '(;; generally useful packages
+     ;; evil
+     ;; evil-leader
+     company
+     company-jedi company-anaconda  company-irony company-tern
+     company-rtags company-irony company-irony-c-headers 
+     company-php company-shell
+     cmake-ide
+     ;; auto-complete auto-complete-clang
+     google-c-style
+     rtags ggtags
+     irony
+     helm helm-swoop helm-company helm-flyspell helm-rtags helm-gtags
+     flycheck flycheck-pos-tip flycheck-irony
+     rainbow-mode rainbow-delimiters
+     smartparens
+     spaceline
+     spaceline-all-the-icons
+     tabbar-ruler
+     mode-icons
+     ;;all-the-icons
+     async
+     projectile 
+     which-key
+     popup
+     markdown-mode
+     ;; git/github
+     magit
+     magithub
+     diff-hl
+     ;; ruby
+     robe
+     chruby
+     rspec-mode
+     rvm
+     rubocop
+     ruby-tools
+     rake
+     enh-ruby-mode
+     ;; python related packages
+     jedi
+     pytest
+     quickrun
+     dumb-jump
+     ;; themes
+     noctilux-theme
+     dracula-theme
+     monokai-theme
+     darkokai-theme
+     base16-theme
+     yasnippet yasnippet-snippets auto-yasnippet)
+  )
 
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives 
+  '("gnu" . "https://elpa.gnu.org/packages/") t)
+(add-to-list 'package-archives 
+  '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives 
+	'("melpa" . "https://melpa.org/packages/") t)
+;; (add-to-list 'package-archives
+;;  '("marmalade" . "https://marmalade-repo.org/packages/") t)
+
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
 ;; Update your local package index
@@ -64,56 +84,129 @@
   (unless (package-installed-p package)
     (package-install package)))
 
-
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun mytabbar()
+(defun my/themes-reset ()
+  "reset themes"
+  (interactive)
+  (dolist (i custom-enabled-themes)
+    (disable-theme i))
+  (set-face-attribute 'fringe nil :background nil)
+  (set-face-attribute 'linum nil :background nil)
+  ;; Selected text
+  (set-face-attribute  'region nil :background nil)
+  (set-face-foreground 'highlight nil)
+  )
+
+(defun my/themes-dark()
+  "apply dark themes values"
+  (interactive)
+  ;; remove spacemacs background
+  (my/themes-reset)
+
+  ;; Fix darkokai colors
+  (with-eval-after-load 'darkokai-theme
+    (set-face-attribute 'region nil :background "#6b4e2e")
+    (set-face-foreground 'highlight nil))
+  (setq-default
+    darkokai-mode-line-padding 1 ;; Default mode-line box width
+    darkokai-distinct-fringe-background t
+    darkokai-high-contrast-mode-line nil
+    darkokai-use-variable-pitch nil
+    darkokai-height-minus-1 0.8
+    darkokai-height-plus-1 1.0
+    darkokai-height-plus-2 1.05
+    darkokai-height-plus-3 1.1
+    darkokai-height-plus-4 1.15)
+
+  ;; Fix monokai colors
+  (with-eval-after-load 'monokai-theme
+    (set-face-attribute 'fringe nil :background "#181a1b")
+    (set-face-attribute 'linum nil :background "#202324")
+    ;; Selected text
+    (set-face-attribute  'region nil :background "#6b4e2e")
+    (set-face-foreground 'highlight nil)
+    ;; (load-theme 'monokai-theme)
+    )
+  (setq-default
+    monokai-distinct-fringe-background t
+    monokai-foreground     "#f8fbfc"
+    monokai-background     "#0c0d0d"
+    monokai-highlight      "#5D6365"
+    monokai-highlight-alt  "#3E3D31"
+    ;; current line bg
+    monokai-highlight-line "#202324"
+    monokai-line-number    "#5b5c57"
+    monokai-emphasis       "#ffffff"
+    monokai-comments       "#6A6D70"
+    ;; colours
+    monokai-blue           "#06d8ff"
+    monokai-cyan           "#53f2dc"
+    monokai-green          "#63de5d"
+    monokai-gray           "#3E4451"
+    monokai-violet         "#ab7eff"
+    monokai-magenta        "#ff8eff"
+    monokai-red            "#ff0066"
+    monokai-orange         "#ffac4a"
+    monokai-yellow         "#E6DB74"
+    monokai-gray           "#35393b"
+    ;; org-mode headers
+    monokai-height-minus-1 0.8
+    monokai-height-plus-1 1.0
+    monokai-height-plus-2 1.05
+    monokai-height-plus-3 1.1
+    monokai-height-plus-4 1.15
+    monokai-user-variable-pitch t)
+  )
+
+(defun my/tabbar()
+  "Create a nice tabbar grouped by projectile project"
   (interactive)
   (custom-set-variables '(tabbar-separator (quote (0.5))))
   (setq tabbar-ruler-global-tabbar 1)    ; get tabbar
   (setq tabbar-ruler-excluded-buffers
-        '("*Messages*" "*Completions*" "*ESS*" "*Packages*" "*log-edit-files*"
-          "*helm-mini*" "*helm-mode-describe-variable*" "*Minibuf-0*" "*Minibuf-1*"
-          "*Echo Area 0" "Echo Area 1*" "*which-key*"))
+    '("*Messages*" "*Completions*" "*ESS*" "*Packages*" "*log-edit-files*"
+       "*helm-mini*" "*helm-mode-describe-variable*" "*Minibuf-0*" "*Minibuf-1*"
+       "*Echo Area 0" "Echo Area 1*" "*which-key*"))
   (require 'tabbar-ruler)
   (run-hooks 'tabbar-load-hook)
   (set-face-attribute 'tabbar-default nil
-                      :background "gray20" :foreground "gray60"
-                      :box '(:line-width 1 :color "gray20" :style nil))
+    :background "gray20" :foreground "gray60"
+    :box '(:line-width 1 :color "gray20" :style nil))
   (set-face-attribute 'tabbar-unselected nil
-                      :background "gray30" :foreground "white"
-                      :box '(:line-width 1 :color "gray30" :style nil))
+    :background "gray30" :foreground "white"
+    :box '(:line-width 1 :color "gray30" :style nil))
   (set-face-attribute 'tabbar-unselected-highlight nil
-                      :background "gray30" :foreground "yellow"
-                      :box '(:line-width 1 :color "gray30" :style nil))
+    :background "gray30" :foreground "yellow"
+    :box '(:line-width 1 :color "gray30" :style nil))
   (set-face-attribute 'tabbar-unselected-modified nil
-                      :background "gray30" :foreground "#af5f00"
-                      :box '(:line-width 1 :color "gray30" :style nil))
+    :background "gray30" :foreground "#af5f00"
+    :box '(:line-width 1 :color "gray30" :style nil))
   (set-face-attribute 'tabbar-selected nil
-                      :background "gray75"  :foreground "black"
-                      :box '(:line-width 5 :color "gray75" :style nil))
+    :background "gray75"  :foreground "black"
+    :box '(:line-width 5 :color "gray75" :style nil))
   (set-face-attribute 'tabbar-selected-highlight nil
-                      :background "yellow"  :foreground "black"
-                      :box '(:line-width 5 :color "yellow" :style nil))
+    :background "yellow"  :foreground "black"
+    :box '(:line-width 5 :color "yellow" :style nil))
   (set-face-attribute 'tabbar-selected-modified nil
-                      :background "gray75"  :foreground "red"
-                      :box '(:line-width 5 :color "gray75" :style nil))
+    :background "gray75"  :foreground "red"
+    :box '(:line-width 5 :color "gray75" :style nil))
   (set-face-attribute 'tabbar-highlight nil
-                      :background "gray75" :foreground "black"
-                      :underline t
-                      :box '(:line-width 5 :color "gray75" :style nil))
+    :background "gray75" :foreground "black"
+    :underline t
+    :box '(:line-width 5 :color "gray75" :style nil))
   (set-face-attribute 'tabbar-button nil
-                      :box '(:line-width 1 :color "gray20" :style nil))
+    :box '(:line-width 1 :color "gray20" :style nil))
   (set-face-attribute 'tabbar-separator nil
-                      :background "gray20" :height 0.5)
+    :background "gray20" :height 0.5)
   (setq tool-bar-border 0)
+  (projectile-mode t)
   (tabbar-ruler-group-by-projectile-project)
   )
 
-(defun mycpp ()
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; Setup cmake-ide & rtags
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/cpp ()
+  "Setup cmake-ide & rtags"
+  (interactive)
   ;; Load rtags and start the cmake-ide-setup process
   (require 'rtags)
   (require 'cmake-ide)
@@ -129,85 +222,108 @@
   (rtags-diagnostics)
   (setq rtags-completions-enabled t)
   (rtags-enable-standard-keybindings)
+  (yas-global-mode 1)
+
+  (with-eval-after-load "projectile"
+    (push '("cc" "h") projectile-other-file-alist)
+    (push '("c" "h") projectile-other-file-alist)
+    (push '("h" "cc" "c") projectile-other-file-alist))
   )
 
-(defun mypython ()
+(defun my/python ()
   ;; various settings for Jedi
   (setq
-   jedi:complete-on-dot t
-   jedi:setup-keys t
-   py-electric-colon-active t
-   py-smart-indentation t)
+    jedi:complete-on-dot t
+    jedi:setup-keys t
+    py-electric-colon-active t
+    py-smart-indentation t)
   )
 
-(defun mycursor()
-  (setq-default cursor-type '("#ffffff" (bar . 2)))
-  (setq-default evil-insert-state-cursor '("#ffffff" (bar . 2)))
-  (setq evil-emacs-state-cursor '("#ffffff" (bar . 2)))
+(defun my/cursor()
+  "Create a nice blinking bar cursor"
+  (interactive)
+  (setq cursor-type '(bar . 3))
+  (setq evil-insert-state-cursor '(bar . 3))
+  (setq evil-emacs-state-cursor '(bar . 3))
   (custom-set-variables
-   '(blink-cursor-mode t))
+    '(blink-cursor-mode t))
+  (tooltip-mode t)
+  ;; Mouse/scroll related
+  (setq scroll-margin 1) ; Point can come within 1 line of top or bottom of window
+  (setq scroll-step 1) ; Scroll by 1 line at a time
+  (setq scroll-conservatively 10000) ; automatic scrolling never centers point
+  (setq auto-window-vscroll nil) ; automatically modify the vertical scroll
+                                        ; position to scroll through display rows
+                                        ; that are taller than the height of the window
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ; scroll one line at a time
   )
-(defun mycompany()
+
+(defun my/company()
   (require 'company)
   ;; company is the completion backend
-  (global-company-mode 1)
+  (global-company-mode t)
+  (global-auto-complete-mode t)
+  (add-hook 'after-init-hook 'global-company-mode)
+  (setq company-idle-delay 0.8)
+  (setq company-minimum-prefix-length 2)
   (eval-after-load 'company
     '(progn
        (define-key company-mode-map (kbd "C-:") 'helm-company)
        (define-key company-active-map (kbd "C-:") 'helm-company)))
-  (add-to-list 'company-backends 'company-irony)
-  (add-to-list 'company-backends 'company-shell)
-  (add-to-list 'company-backends 'company-jedi)
-  (add-to-list 'company-backends 'company-ac-php-backend)
+  (setq company-backends '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode
+                             company-semantic company-files company-ac-php-backend
+                             company-elisp company-inf-ruby company-anaconda company-robe
+                             company-gtags company-rtags company-irony-c-headers
+                             company-web-html company-web-jade company-web-slim
+                             company-go company-irony company-clang company-keywords
+                             company-cmake company-css company-yasnippet)
+                            (company-dabbrev company-dabbrev-code)))
   ;; python specific stuff
   (require 'company-jedi)
   )
 
-(defun myhelm()
+(defun my/helm()
   (autoload 'helm-company "helm-company") ;; Enable helm company
   )
 
-(defun mygit()
+(defun my/git()
   ;; You need to install fringe-helper.el
-  (require 'git-gutter-fringe)
-  ;; Please adjust fringe width if your own sign is too big.
+  (require 'diff-hl)
+  (global-diff-hl-mode 1)
+  (diff-hl-flydiff-mode 1)
+  (diff-hl-margin-minor-mode 1)
   (setq-default left-fringe-width  20)
   (setq-default right-fringe-width 20)
-  (setq git-gutter-fr:side 'left-fringe)
-  (global-git-gutter-mode 1)
   (load-library "magit")
-  ;; (load-library "magithub")
-  ;; (magithub-feature-autoinject t)
   (global-set-key "\C-xg" 'magit-status)
   )
 
-(defun myspaceline()
+(defun my/spaceline()
   ;; enable spaceline
   (require 'spaceline)
   (require 'spaceline-config)
   (spaceline-spacemacs-theme)
-  ;;(require 'spaceline-all-the-icons)
-  ;;(spaceline-all-the-icons-theme)
   (spaceline-compile)
   )
 
-(defun mydesktop()
+
+(defun my/desktop()
   (setq dotspacemacs-auto-resume-layouts t
-        desktop-dirname             "~/.emacs.d/"
-        desktop-base-file-name      ".emacs.desktop"
-        desktop-base-lock-name      "lock"
-        desktop-path                (list desktop-dirname)
-        desktop-save                1
-        desktop-files-not-to-save   "^$" ;reload tramp paths
-        desktop-load-locked-desktop 1
-        desktop-auto-save-timeout   30)
+    desktop-dirname             "~/.emacs.d/"
+    desktop-base-file-name      ".emacs.desktop"
+    desktop-base-lock-name      "lock"
+    desktop-path                (list desktop-dirname)
+    desktop-save                1
+    desktop-files-not-to-save   "^$" ;reload tramp paths
+    desktop-load-locked-desktop 1
+    desktop-auto-save-timeout   30)
   (setq your-own-path desktop-dirname)
   (if (file-exists-p
-       (concat your-own-path desktop-base-file-name))
-      (desktop-read your-own-path))
+        (concat your-own-path desktop-base-file-name))
+    (desktop-read your-own-path))
   (add-hook 'kill-emacs-hook
-            `(lambda ()
-               (desktop-save ,your-own-path t)))
+    `(lambda ()
+       (desktop-save ,your-own-path t)))
   (desktop-save-mode 1)
   )
 ;;; End Custom functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -225,27 +341,18 @@
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 (add-hook 'prog-mode-hook #'rainbow-mode)
 
-(global-auto-complete-mode 1)
+;; (global-auto-complete-mode 1)
 
 ;; Check for errors
 (require 'flycheck)
 (global-flycheck-mode 1)
 (flycheck-pos-tip-mode 1)
 
-;; Enable evil mode
-(require 'evil)
-(evil-mode t)
-(require 'evil-leader)
-(global-evil-leader-mode)
-(evil-leader/set-leader ",")
-(evil-leader/set-key
-  "b" 'switch-to-buffer
-  "w" 'save-buffer)
-
 ;; use helm for auto-complete commands
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
+(global-set-key (kbd "C-s") #'helm-swoop)
 (helm-mode 1)
 
 ;; enable yasnippet
@@ -255,13 +362,16 @@
 
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(mydesktop)
-(add-hook 'window-setup-hook #'mytabbar)
-(mycpp)
-;;(mycursor)
-(mygit)
-(myhelm)
-(mycompany)
+(setenv "SHELL" "/bin/bash")
+(my/desktop)
+(add-hook 'window-setup-hook #'my/tabbar)
+(my/cpp)
+(my/python)
+(my/themes-dark)
+(my/git)
+(my/helm)
+(my/company)
+(my/cursor)
 
 ;; cua mode
 (cua-mode 1)
@@ -273,15 +383,20 @@
 
 ;; 2 space identation and safe theme
 (custom-set-variables
- '(indent-tabs-mode nil)
- '(tab-width 2)
- '(standard-indent 2)
- '(js-indent-level 2)
- '(sh-indentation 2)
- '(custom-safe-themes
-   (quote
-    ("53f97243218e8be82ba035ae34c024fd2d2e4de29dc6923e026d5580c77ff702" default)))
- )
+  '(c-default-style "k&r")
+  '(c-basic-offset 2)
+  '(default-tab-width 2 t)
+  '(indent-tabs-mode nil)
+  '(js-indent-level 2)
+  '(lisp-indent-offset 2)
+  '(perl-indent-level 2)
+  '(ruby-indent-level 2)
+  '(sh-basic-offset 2)
+  '(sh-indentation 2)
+  '(standard-indent 2)
+  '(tab-width 2)
+  '(python-indent-offset 4)
+  '(tabbar-separator (quote (0.5))))
 
 ;; set a default font to Droid
 (when (member "Droid Sans Mono" (font-family-list))
@@ -293,23 +408,27 @@
 (load custom-file 'noerror)
 
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
-(load-theme 'monokai)
+(load-theme 'darkokai)
 (setq monokai-distinct-fringe-background 1)
 
-(global-auto-highlight-symbol-mode t)
-(auto-highlight-symbol-mode t)
-(ahs-set-idle-interval 1.0) ;; 1s before highlight
+(fringe-mode '(4 . 4))
+(setq-default linum-format " %2d " )
 
-(tool-bar-mode 0)
-;;(menu-bar-mode 1)
-(set-scroll-bar-mode nil)
+(tool-bar-mode 1)
+(menu-bar-mode 0)
+;;(set-scroll-bar-mode nil)
 (setq inhibit-startup-screen 1)
 (setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
 
+(with-eval-after-load 'yasnippet
+  (setq yas-prompt-functions '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt))
+  )
+
 ;; last lines
-(myspaceline)
+(my/spaceline)
 (provide 'init)
+
 ;;; init.el ends here
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
