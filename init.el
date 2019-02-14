@@ -343,6 +343,11 @@
 
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; start emacs daemon
+(if (and (fboundp 'server-running-p)
+      (not (server-running-p)))
+  (server-start))
+
 (setenv "SHELL" "/bin/bash")
 (defun my/window()
 (my/cursor)
