@@ -40,6 +40,7 @@
      json-mode
      ;; git/github
      magit
+     magit-popup
      magithub
      diff-hl
      ;; ruby
