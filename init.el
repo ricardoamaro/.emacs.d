@@ -75,7 +75,7 @@
 (add-to-list 'package-archives
 	'("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives
-  '("marmalade" . "https://marmalade-repo.org/packages/") t)
+  '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
