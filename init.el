@@ -58,6 +58,9 @@
      pytest
      quickrun
      dumb-jump
+     ;; visual
+     adaptive-wrap
+     column-enforce-mode
      ;; themes
      noctilux-theme
      dracula-theme
@@ -420,7 +423,12 @@
 
 ;; last lines
 (load-theme 'monokai)
-(global-hl-line-mode )
+(global-hl-line-mode 1)
+;; Adaptive wrap anyways needs the `visual-line-mode' to be enabled. So
+;; enable it only when the latter is enabled.
+(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+(global-visual-line-mode 1)
+
 (my/spaceline)
 (provide 'init)
 
