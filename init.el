@@ -297,6 +297,8 @@
   (global-set-key (kbd "M-m b b") #'helm-mini)
   (global-set-key (kbd "M-m p h") #'helm-projectile)
   (global-set-key (kbd "M-m p f") #'helm-projectile-find-file)
+  (global-set-key (kbd "M-m p p") #'helm-projectile-switch-project)
+  
   (global-set-key (kbd "M-m g s") #'magit-status)
 
   (helm-mode 1)
