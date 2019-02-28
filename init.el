@@ -32,6 +32,7 @@
      mode-icons
      ;;all-the-icons
      async
+     bison-mode
      projectile
      which-key
      popup
@@ -69,13 +70,13 @@
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 (add-to-list 'package-archives
-  '("gnu" . "http://elpa.gnu.org/packages/") t)
+  '("gnu" . "https://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives
-  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives
-	'("melpa" . "http://melpa.org/packages/") t)
+	'("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives
-  '("marmalade" . "http://marmalade-repo.org/packages/") t)
+  '("marmalade" . "http://marmalade.ferrier.me.uk/packages") t)
 
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
@@ -105,7 +106,7 @@
   "Apply dark themes values."
   (interactive)
   ;; remove spacemacs background
-  (my/themes-reset)
+  ;; (my/themes-reset)
 
   ;; Fix darkokai colors
   (with-eval-after-load 'darkokai-theme
@@ -396,9 +397,6 @@
 (setq-default custom-file "~/.emacs.d/custom.el")
 (load custom-file 'noerror)
 
-;; Load my theme noctilux-theme dracula-theme or monokai-theme
-(load-theme 'darkokai)
-
 ;; Put file path on title bar
 (setq frame-title-format '("%f   (" invocation-name "@" system-name " | %m)") )
 (tool-bar-mode 0)
@@ -406,8 +404,8 @@
 
 (if (display-graphic-p)
     (progn
-      (tool-bar-mode -1)
-      (scroll-bar-mode -1)))
+      ;;(tool-bar-mode 0)
+      (scroll-bar-mode 0)))
 
 (setq inhibit-startup-screen 1)
 (setq initial-scratch-message nil)
@@ -417,7 +415,12 @@
    (setq yas-prompt-functions
  	'(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
 
+;; Load my theme noctilux-theme dracula-theme or monokai-theme
+;; (load-theme 'monokai)
+
 ;; last lines
+(load-theme 'monokai)
+(global-hl-line-mode )
 (my/spaceline)
 (provide 'init)
 
