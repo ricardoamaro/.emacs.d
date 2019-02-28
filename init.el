@@ -23,6 +23,7 @@
      rtags ggtags
      irony
      helm helm-swoop helm-company helm-flyspell helm-rtags helm-gtags
+     projectile helm-projectile
      flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
      rainbow-mode rainbow-delimiters
      smartparens
@@ -33,7 +34,6 @@
      ;;all-the-icons
      async
      bison-mode
-     projectile
      which-key
      popup
      markdown-mode
@@ -66,7 +66,7 @@
      dracula-theme
      monokai-theme
      darkokai-theme
-     base16-theme
+     ;;base16-theme
      yasnippet yasnippet-snippets auto-yasnippet)
   )
 
@@ -280,7 +280,7 @@
        (define-key company-mode-map (kbd "C-:") 'helm-company)
        (define-key company-active-map (kbd "C-:") 'helm-company)))
   (setq company-backends '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic company-files company-ac-php-backend company-elisp company-inf-ruby company-anaconda company-robe company-gtags company-rtags company-irony-c-headers company-web company-web-html company-web-jade company-web-slim company-go company-irony company-clang company-keywords company-cmake company-css company-yasnippet)
-(company-dabbrev company-dabbrev-code)))
+                            (company-dabbrev company-dabbrev-code)))
   ;; python specific stuff
   (require 'company-jedi)
   )
@@ -288,6 +288,18 @@
 (defun my/helm()
   (interactive)
   (autoload 'helm-company "helm-company") ;; Enable helm company
+  ;; use helm for auto-complete commands
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  (global-unset-key (kbd "M-m"))
+  (global-set-key (kbd "M-m s s") #'helm-swoop)
+  (global-set-key (kbd "M-m b b") #'helm-mini)
+  (global-set-key (kbd "M-m p h") #'helm-projectile)
+  (global-set-key (kbd "M-m p f") #'helm-projectile-find-file)
+  (global-set-key (kbd "M-m g s") #'magit-status)
+
+  (helm-mode 1)
   )
 
 (defun my/git()
@@ -314,6 +326,17 @@
   (spaceline-compile)
   )
 
+(defun my/projectile()
+  "make sure projectile is configured correctly"
+  (interactive)
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-global-mode)
+  (setq projectile-completion-system 'helm)
+  (helm-projectile-on)
+  )
+
 ;;; End Custom functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; show the function you are in
@@ -334,12 +357,6 @@
 (global-flycheck-mode 1)
 (flycheck-pos-tip-mode 1)
 
-;; use helm for auto-complete commands
-(global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "M-s") #'helm-swoop)
-(helm-mode 1)
 
 ;; enable yasnippet
 (require 'yasnippet)
@@ -363,6 +380,7 @@
 (my/themes-dark)
 (my/git)
 (my/helm)
+(my/projectile)
 (my/window)
 (add-hook 'after-change-major-mode-hook 'my/window)
 
@@ -406,17 +424,17 @@
 (menu-bar-mode 0)
 
 (if (display-graphic-p)
-    (progn
-      ;;(tool-bar-mode 0)
-      (scroll-bar-mode 0)))
+  (progn
+    ;;(tool-bar-mode 0)
+    (scroll-bar-mode 0)))
 
 (setq inhibit-startup-screen 1)
 (setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
 
 (with-eval-after-load 'yasnippet
-   (setq yas-prompt-functions
- 	'(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
+  (setq yas-prompt-functions
+    '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
 
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
 ;; (load-theme 'monokai)
