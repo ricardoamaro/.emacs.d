@@ -61,6 +61,9 @@
      ;; visual
      adaptive-wrap
      column-enforce-mode
+     ;; ergoemacs keys
+     ergoemacs-mode
+     ergoemacs-status
      ;; themes
      noctilux-theme
      dracula-theme
@@ -76,8 +79,10 @@
   '("gnu" . "http://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives
   '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+;;(add-to-list 'package-archives
+;;  '("melpa-dev" . "http://melpa.milkbox.net/packages/") t)
 (add-to-list 'package-archives
-	'("melpa" . "http://melpa.org/packages/") t)
+  '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives
   '("marmalade" . "http://marmalade.ferrier.me.uk/packages") t)
 
@@ -387,7 +392,13 @@
 (add-hook 'after-change-major-mode-hook 'my/window)
 
 ;; cua mode
-(cua-mode 1)
+;; (cua-mode 1)
+
+;;ergoemacs-mode
+(setq ergoemacs-theme "standard") ;; Uses Standard Ergoemacs keyboard theme
+(setq ergoemacs-keyboard-layout "pt-nativo") ;; Assumes QWERTY keyboard layout
+(ergoemacs-mode 1)
+
 ;; mouse support
 (xterm-mouse-mode 1)
 
