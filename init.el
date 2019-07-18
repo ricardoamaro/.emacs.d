@@ -776,8 +776,6 @@
 
 ;; show the function you are in
 (which-function-mode 1)
-;; nicer parenthesis handling
-(smartparens-global-mode 1)
 ;; show the parens
 (show-paren-mode 1)
 
