@@ -201,7 +201,6 @@
     ("C-<next>" . centaur-tabs-forward))
   (centaur-tabs-group-by-projectile-project)
   )
-
 (defun my/keys ()
   "Ricardo custom keys"
   (interactive)
@@ -260,7 +259,6 @@
   ;; (define-key evil-insert-state-map (kbd "C-z") 'undo-tree-undo)
   ;; (define-key evil-insert-state-map (kbd "C-y") 'undo-treeredo)
   )
-
 (defun my/cpp ()
   "Setup cmake-ide & rtags."
   (interactive)
@@ -286,7 +284,6 @@
     (push '("c" "h") projectile-other-file-alist)
     (push '("h" "cc" "c") projectile-other-file-alist))
   )
-
 (defun my/python ()
   ;; various settings for Jedi
   (interactive)
@@ -296,7 +293,6 @@
     py-electric-colon-active t
     py-smart-indentation t)
   )
-
 (defun my/cursor()
   "Create a nice blinking bar cursor"
   (interactive)
@@ -315,7 +311,6 @@
                                         ; that are taller than the height of the window
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ; scroll one line at a time
   )
-
 (defun my/company()
   (interactive)
   ;; company is the completion backend
@@ -463,7 +458,6 @@
   ;; python specific stuff
   (require 'company-jedi)
   )
-
 (defun my/helm()
   (interactive)
   (autoload 'helm-company "helm-company") ;; Enable helm company
@@ -482,7 +476,6 @@
 
   (helm-mode 1)
   )
-
 (defun my/git()
   (interactive)
   ;; You need to install fringe-helper.el
@@ -535,7 +528,6 @@
   (global-set-key "\C-xg" 'magit-status)
 
   )
-
 (defun my/spaceline()
   (interactive)
 
@@ -615,7 +607,6 @@
               (spaceline-toggle-all-the-icons-battery-status-off)
               (spaceline-toggle-hud-off)))
   )
-
 (defun my/projectile()
   "make sure projectile is configured correctly"
   (interactive)
@@ -626,7 +617,6 @@
   (setq projectile-completion-system 'helm)
   (helm-projectile-on)
   )
-
 (defun my/indent2spcs ()
   "2 spaces indent."
   (interactive)
@@ -664,7 +654,6 @@
     tab-width 2
     python-indent-offset 4)
   )
-
 (defun my/highlight ()
   "highlights"
   (interactive)
@@ -737,7 +726,6 @@
       (cl-pushnew `(,keyword . ,(face-foreground 'warning)) hl-todo-keyword-faces)))
 
   )
-
 (defun my/linenumbers ()
   "line lumbers"
   (interactive)
@@ -785,6 +773,14 @@
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; start emacs daemon
+;; Environment
+(use-package exec-path-from-shell
+  :init
+  (setq exec-path-from-shell-check-startup-files nil)
+  (setq exec-path-from-shell-variables '("PATH" "MANPATH" "PYTHONPATH" "GOPATH"))
+  (setq exec-path-from-shell-arguments '("-l"))
+  (exec-path-from-shell-initialize))
+
 (if (and (fboundp 'server-running-p)
       (not (server-running-p)))
   (server-start))
