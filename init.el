@@ -7,10 +7,7 @@
 
 ;; Put file path on title bar
 (setq frame-title-format '("%f [%m]  (" invocation-name "@" system-name ")"))
-
-
 (require 'package)
-
 ;;; Code:
 (defvar my-packages)
 (setq my-packages
@@ -30,8 +27,9 @@
      google-c-style
      rtags ggtags
      irony
-     helm helm-swoop helm-company helm-flyspell helm-rtags helm-gtags
-     projectile helm-projectile
+     swiper counsel ivy
+     ;;helm helm-company helm-flyspell helm-rtags helm-gtags helm-projectile
+     projectile
      flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
      rainbow-mode rainbow-delimiters
      paren symbol-overlay hl-line
@@ -76,7 +74,6 @@
      ;;base16-theme
      yasnippet yasnippet-snippets auto-yasnippet)
   )
-
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 (add-to-list 'package-archives
@@ -177,7 +174,118 @@
   ;;   (set-face-attribute 'default nil :font "Droid Sans Mono")
   ;;   (set-frame-font "Droid Sans Mono-11"))  ; set font for current window
   )
+(defun my/counsel ()
+  "find files and other stuff"
+  (interactive)
+  (use-package counsel
+    :diminish ivy-mode counsel-mode
+    :defines (projectile-completion-system magit-completing-read-function recentf-list)
+    :bind (("C-s" . swiper-isearch)
+            ("s-f" . swiper)
+            ("C-S-s" . swiper-all)
 
+            ("C-c C-r" . ivy-resume)
+            ("C-c v p" . ivy-push-view)
+            ("C-c v o" . ivy-pop-view)
+            ("C-c v ." . ivy-switch-view)
+
+            :map counsel-mode-map
+            ([remap swiper] . counsel-grep-or-swiper)
+            ([remap dired] . counsel-dired)
+            ("C-x C-r" . counsel-recentf)
+            ("C-x j" . counsel-mark-ring)
+            ("C-h F" . counsel-describe-face)
+
+            ("C-c L" . counsel-load-library)
+            ("C-c P" . counsel-package)
+            ("C-c f" . counsel-find-library)
+            ("C-c g" . counsel-grep)
+            ("C-c h" . counsel-command-history)
+            ("C-c i" . counsel-git)
+            ("C-c j" . counsel-git-grep)
+            ("C-c l" . counsel-locate)
+            ("C-c r" . counsel-rg)
+            ("C-c z" . counsel-fzf)
+
+            ("C-c c F" . counsel-faces)
+            ("C-c c L" . counsel-load-library)
+            ("C-c c P" . counsel-package)
+            ("C-c c a" . counsel-apropos)
+            ("C-c c e" . counsel-colors-emacs)
+            ("C-c c f" . counsel-find-library)
+            ("C-c c g" . counsel-grep)
+            ("C-c c h" . counsel-command-history)
+            ("C-c c i" . counsel-git)
+            ("C-c c j" . counsel-git-grep)
+            ("C-c c l" . counsel-locate)
+            ("C-c c m" . counsel-minibuffer-history)
+            ("C-c c o" . counsel-outline)
+            ("C-c c p" . counsel-pt)
+            ("C-c c r" . counsel-rg)
+            ("C-c c s" . counsel-ag)
+            ("C-c c t" . counsel-load-theme)
+            ("C-c c u" . counsel-unicode-char)
+            ("C-c c w" . counsel-colors-web)
+            ("C-c c z" . counsel-fzf)
+
+            :map ivy-minibuffer-map
+            ("C-w" . ivy-yank-word)
+
+            :map counsel-find-file-map
+            ("C-h" . counsel-up-directory)
+
+            :map swiper-map
+            ("M-s" . swiper-isearch-toggle)
+            ("M-%" . swiper-query-replace)
+
+            :map isearch-mode-map
+            ("M-s" . swiper-isearch-toggle))
+    :hook ((after-init . ivy-mode)
+            (ivy-mode . counsel-mode))
+    :init
+    (setq enable-recursive-minibuffers t) ; Allow commands in minibuffers
+
+    (setq ivy-use-selectable-prompt t
+      ivy-use-virtual-buffers t    ; Enable bookmarks and recentf
+      ivy-height 10
+      ivy-count-format "(%d/%d) "
+      ivy-on-del-error-function nil
+      ivy-initial-inputs-alist nil)
+
+    (setq swiper-action-recenter t)
+
+    (setq counsel-find-file-at-point t
+      counsel-yank-pop-separator "\n────────\n")
+    :config
+    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function))
+
+    ;; Use faster search tools: ripgrep or the silver search
+    (let ((cmd (cond ((executable-find "rg")
+                       "rg -S --no-heading --line-number --color never '%s' %s")
+                 ((executable-find "ag")
+                   "ag -S --noheading --nocolor --nofilename --numbers '%s' %s")
+                 (t counsel-grep-base-command))))
+      (setq counsel-grep-base-command cmd))
+    )
+  )
+(defun my/helm()
+  (interactive)
+  (autoload 'helm-company "helm-company") ;; Enable helm company
+  ;; use helm for auto-complete commands
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  (global-unset-key (kbd "M-m"))
+  (global-set-key (kbd "M-m s s") #'helm-swoop)
+  (global-set-key (kbd "M-m b b") #'helm-mini)
+  (global-set-key (kbd "M-m p h") #'helm-projectile)
+  (global-set-key (kbd "M-m p f") #'helm-projectile-find-file)
+  (global-set-key (kbd "M-m p p") #'helm-projectile-switch-project)
+
+  (global-set-key (kbd "M-m g s") #'magit-status)
+
+  (helm-mode 1)
+  )
 (defun my/tabs()
   "Use centaur-tabs"
   "https://github.com/ema2159/centaur-tabs"
@@ -457,24 +565,6 @@
 
   ;; python specific stuff
   (require 'company-jedi)
-  )
-(defun my/helm()
-  (interactive)
-  (autoload 'helm-company "helm-company") ;; Enable helm company
-  ;; use helm for auto-complete commands
-  (global-set-key (kbd "M-x") #'helm-M-x)
-  (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-  (global-set-key (kbd "C-x C-f") #'helm-find-files)
-  (global-unset-key (kbd "M-m"))
-  (global-set-key (kbd "M-m s s") #'helm-swoop)
-  (global-set-key (kbd "M-m b b") #'helm-mini)
-  (global-set-key (kbd "M-m p h") #'helm-projectile)
-  (global-set-key (kbd "M-m p f") #'helm-projectile-find-file)
-  (global-set-key (kbd "M-m p p") #'helm-projectile-switch-project)
-
-  (global-set-key (kbd "M-m g s") #'magit-status)
-
-  (helm-mode 1)
   )
 (defun my/git()
   (interactive)
@@ -795,7 +885,7 @@
 (my/python)
 (my/company)
 (my/git)
-(my/helm)
+(my/counsel)
 (my/projectile)
 (my/window)
 (my/indent2spcs)
