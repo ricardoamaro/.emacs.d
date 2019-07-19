@@ -80,6 +80,9 @@
   '("org" . "https://orgmode.org/elpa/") t)
 
 (defconst d/emacs-start-time (current-time))
+;; propose using external TLS
+(if (fboundp 'gnutls-available-p)
+  (fmakunbound 'gnutls-available-p))
 
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
