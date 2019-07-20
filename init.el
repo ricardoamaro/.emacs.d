@@ -50,6 +50,9 @@
   )
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
+
+ (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+
 (add-to-list 'package-archives
   '("gnu" . "https://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives
