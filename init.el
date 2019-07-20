@@ -14,30 +14,20 @@
   '(;; generally useful packages
      ;; evil
      ;; evil-leader
-     company
      company-jedi company-anaconda company-irony company-tern
      company-rtags company-irony company-irony-c-headers
      company-php company-shell company-web
-     company-lsp ;; company-box ;; company-box > 26
-     lsp-mode lsp-ruby lsp-python lsp-sh lsp-ui
      cmake-ide
-     sh-script
      lua-mode
      ;; auto-complete auto-complete-clang
      google-c-style
      rtags ggtags
      irony
-     swiper counsel ivy
      ;;helm helm-company helm-flyspell helm-rtags helm-gtags helm-projectile
      ;; projectile
      flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
-     rainbow-mode rainbow-delimiters
      paren symbol-overlay hl-line
-     mode-icons all-the-icons-dired all-the-icons xpm
-     spaceline spaceline-all-the-icons
-     centaur-tabs ;; tabbar-ruler
-     ;;highlight-thing
-     ;;all-the-icons
+     mode-icons all-the-icons-dired all-the-icons
      async
      bison-mode
      which-key
@@ -46,22 +36,12 @@
      web-mode
      json-mode
      ;; git/github
-     magit magit-popup magithub
-     diff-hl
-     ;; ruby
-     robe chruby rspec-mode rvm rubocop ruby-tools
-     rake enh-ruby-mode
-     ;; python related packages
-     jedi pytest
      quickrun
      dumb-jump
      ;; visual
-     adaptive-wrap
      column-enforce-mode
      ;; org md
      markdown-mode
-     ;; ergoemacs keys
-     ergoemacs-mode ergoemacs-status
      ;; themes
      dracula-theme leuven-theme
      monokai-theme darkokai-theme
@@ -100,19 +80,6 @@
 (dolist (package my-packages)
   (unless (package-installed-p package)
     (package-install package)))
-(use-package company
-  :defer 2
-  :diminish
-  :custom
-  (company-begin-commands '(self-insert-command))
-  (company-idle-delay .1)
-  (company-minimum-prefix-length 2)
-  (company-show-numbers t)
-  (company-tooltip-align-annotations 't)
-  (global-company-mode t))
-(use-package sh-script
-  :ensure nil
-  :hook (after-save . executable-make-buffer-file-executable-if-script-p))
 ;; Check for errors
 (require 'flycheck)
 (global-flycheck-mode 1)
@@ -129,7 +96,6 @@
 ;; With use-package:
 ;;(use-package company-box
 ;;  :hook (company-mode . company-box-mode))
-
 (load-theme 'monokai t)
 ;; To disable the menu bar
 (menu-bar-mode -1)
@@ -139,7 +105,155 @@
   (tool-bar-mode -1))
 
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/lsp ()
+  "Load lsp-mode."
+  (interactive)
+  (use-package lsp-mode
+    :hook (prog-mode . lsp-deferred)
+    :commands (lsp lsp-deferred))
+  ;; optionally
+  (use-package lsp-ui :commands lsp-ui-mode)
+  (use-package company-lsp :commands company-lsp)
+  (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  ;; optionally if you want to use debugger
+  (use-package dap-mode)
+  ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+  (use-package lsp-ruby)
+  (use-package lsp-python)
+  (use-package lsp-sh)
+  )
+(defun my/ruby ()
+  "Load my Ruby configs."
+  (interactive)
+  (use-package ruby-mode
+    :ensure nil
+    :mode "\\.\\(rb\\|rake\\|\\gemspec\\|ru\\|\\(Rake\\|Gem\\|Guard\\|Cap\\|Vagrant\\)file\\)$"
+    :interpreter "ruby"
+    :config
+    ;; Ruby refactoring helpers
+    (use-package ruby-refactor
+      :diminish ruby-refactor-mode
+      :hook (ruby-mode . ruby-refactor-mode-launch))
 
+    (use-package robe)
+    (eval-after-load 'company
+      '(push 'company-robe company-backends))
+
+    (use-package rvm)
+    (rvm-use-default) ;; use rvm's default ruby for the current Emacs session
+    (use-package ruby-tools)
+    (use-package rake)
+    ;;(use-package enh-ruby-mode)
+    ;;(use-package chruby)
+
+    ;; Run a Ruby process in a buffer
+    (use-package inf-ruby
+      :hook ((ruby-mode . inf-ruby-minor-mode)
+              (compilation-filter . inf-ruby-auto-enter)))
+
+    ;; Rails
+    (use-package projectile-rails
+      :after projectile
+      :diminish projectile-rails-mode
+      :hook (projectile-mode . projectile-rails-global-mode))
+
+    ;; Rubocop
+    ;; Install: gem install rubocop
+    (use-package rubocop
+      :diminish rubocop-mode
+      :hook (ruby-mode . rubocop-mode))
+
+    ;; RSpec
+    (use-package rspec-mode
+      :diminish rspec-mode
+      :commands rspec-install-snippets
+      :hook (dired-mode . rspec-dired-mode)
+      :config (with-eval-after-load 'yasnippet
+                (rspec-install-snippets)))
+
+    ;; Yet Another RI interface for Emacs
+    (use-package yari
+      :bind (:map ruby-mode-map ([f1] . yari)))
+
+    ;; Ruby YARD comments
+    (use-package yard-mode
+      :diminish yard-mode
+      :hook (ruby-mode . yard-mode)))
+
+  ;; YAML mode
+  (use-package yaml-mode)
+
+
+  )
+(defun my/python ()
+  ;; various settings for Jedi
+  (interactive)
+
+  (use-package python
+    :ensure nil
+    :defines gud-pdb-command-name pdb-path
+    :config
+    ;; Disable readline based native completion
+    (setq python-shell-completion-native-enable nil)
+
+    (add-hook 'inferior-python-mode-hook
+      (lambda ()
+        ;; (bind-key "C-c C-z" #'kill-buffer-and-window inferior-python-mode-map)
+        (process-query-on-exit-flag (get-process "Python"))))
+
+    ;; Live Coding in Python
+    (use-package live-py-mode)
+
+    ;; Format using YAPF
+    ;; Install: pip install yapf
+    (use-package yapfify
+      :diminish yapf-mode
+      :hook (python-mode . yapf-mode))
+
+    ;; python related packages
+    (use-package pytest)
+    (use-package jedi)
+    (add-hook 'python-mode-hook 'jedi:setup)
+    (setq
+      jedi:complete-on-dot t
+      jedi:setup-keys t
+      py-electric-colon-active t
+      py-smart-indentation t)
+    )
+  )
+(defun my/sh ()
+  "My SH packages and configs."
+  (interactive)
+  (use-package sh-script
+    :ensure nil
+    :hook (after-save . executable-make-buffer-file-executable-if-script-p))
+  )
+(defun my/cpp ()
+  "Setup cmake-ide & rtags."
+  (interactive)
+  ;; Load rtags and start the cmake-ide-setup process
+  (require 'rtags)
+  (require 'cmake-ide)
+  (cmake-ide-setup)
+  ;; Set cmake-ide-flags-c++ to use C++11
+  (setq cmake-ide-flags-c++ (append '("-std=c++11")))
+  ;; We want to be able to compile with a keyboard shortcut
+  (global-set-key (kbd "C-c m") 'cmake-ide-compile)
+  ;; Set rtags to enable completions and use the standard keybindings.
+  ;; A list of the keybindings can be found at:
+  ;; http://syamajala.github.io/c-ide.html
+  (setq rtags-autostart-diagnostics t)
+  (rtags-diagnostics)
+  (setq rtags-completions-enabled t)
+  (rtags-enable-standard-keybindings)
+  (yas-global-mode 1)
+
+  (with-eval-after-load "projectile"
+    (push '("cc" "h") projectile-other-file-alist)
+    (push '("c" "h") projectile-other-file-alist)
+    (push '("h" "cc" "c") projectile-other-file-alist))
+  )
 (defun my/fonts ()
   "Start my fonts."
   (interactive)
@@ -167,6 +281,8 @@
 (defun my/ivy ()
   "Find files and other stuff."
   (interactive)
+  (use-package swiper)
+  (use-package ivy)
   (use-package counsel
     :diminish ivy-mode counsel-mode
     :defines (projectile-completion-system magit-completing-read-function recentf-list)
@@ -815,40 +931,6 @@
   ;; (define-key evil-insert-state-map (kbd "C-z") 'undo-tree-undo)
   ;; (define-key evil-insert-state-map (kbd "C-y") 'undo-treeredo)
   )
-(defun my/cpp ()
-  "Setup cmake-ide & rtags."
-  (interactive)
-  ;; Load rtags and start the cmake-ide-setup process
-  (require 'rtags)
-  (require 'cmake-ide)
-  (cmake-ide-setup)
-  ;; Set cmake-ide-flags-c++ to use C++11
-  (setq cmake-ide-flags-c++ (append '("-std=c++11")))
-  ;; We want to be able to compile with a keyboard shortcut
-  (global-set-key (kbd "C-c m") 'cmake-ide-compile)
-  ;; Set rtags to enable completions and use the standard keybindings.
-  ;; A list of the keybindings can be found at:
-  ;; http://syamajala.github.io/c-ide.html
-  (setq rtags-autostart-diagnostics t)
-  (rtags-diagnostics)
-  (setq rtags-completions-enabled t)
-  (rtags-enable-standard-keybindings)
-  (yas-global-mode 1)
-
-  (with-eval-after-load "projectile"
-    (push '("cc" "h") projectile-other-file-alist)
-    (push '("c" "h") projectile-other-file-alist)
-    (push '("h" "cc" "c") projectile-other-file-alist))
-  )
-(defun my/python ()
-  ;; various settings for Jedi
-  (interactive)
-  (setq
-    jedi:complete-on-dot t
-    jedi:setup-keys t
-    py-electric-colon-active t
-    py-smart-indentation t)
-  )
 (defun my/cursor()
   "Create a nice blinking bar cursor"
   (interactive)
@@ -896,7 +978,7 @@
     :config
     (setq company-tooltip-align-annotations t
       company-tooltip-limit 12
-      company-idle-delay 0
+      company-idle-delay .1
       company-echo-delay (if (display-graphic-p) nil 0)
       company-minimum-prefix-length 2
       company-require-match nil
@@ -1017,6 +1099,9 @@
 (defun my/git()
   "My git configs."
   (interactive)
+  (use-package magit)
+  (use-package magit-popup)
+  (use-package magithub)
   ;; You need to install fringe-helper.el
   (use-package diff-hl
     :defines (diff-hl-margin-symbols-alist desktop-minor-mode-table)
@@ -1070,7 +1155,6 @@
 (defun my/spaceline()
   "Create a spaceline."
   (interactive)
-
   ;; Icons
   ;; NOTE: Must run `M-x all-the-icons-install-fonts' manually on Windows
   (use-package all-the-icons
@@ -1115,8 +1199,8 @@
     (add-to-list 'all-the-icons-mode-icon-alist
       '(gfm-mode all-the-icons-octicon "markdown" :face all-the-icons-blue)))
   ;; enable spaceline
-  (require 'spaceline)
-  (require 'spaceline-config)
+  (use-package spaceline)
+  (use-package spaceline-config)
   (spaceline-spacemacs-theme)
   (spaceline-compile)
   (use-package spaceline-all-the-icons
@@ -1151,32 +1235,43 @@
   "make sure projectile is configured correctly"
   (interactive)
 ;; Manage and navigate projects
-(use-package projectile
-  :diminish
-  :bind (:map projectile-mode-map
-         ("s-t" . projectile-find-file) ; `cmd-t' or `super-t'
-         ("C-c p" . projectile-command-map))
-  :hook (after-init . projectile-mode)
-  :init
-  (setq projectile-mode-line-prefix ""
-        projectile-sort-order 'recentf
-        projectile-use-git-grep t)
-  :config
-  ;; (projectile-update-mode-line)         ; Update mode-line at the first time
+  (use-package projectile
+    :diminish
+    :bind (:map projectile-mode-map
+            ("s-t" . projectile-find-file) ; `cmd-t' or `super-t'
+            ("C-c p" . projectile-command-map))
+    :hook (after-init . projectile-mode)
+    :init
+    (setq projectile-mode-line-prefix ""
+      projectile-sort-order 'recentf
+      projectile-use-git-grep t)
+    :config
+    ;; (projectile-update-mode-line)         ; Update mode-line at the first time
 
-  ;; Use the faster searcher to handle project files: ripgrep `rg'.
-  (when (and (not (executable-find "fd"))
-             (executable-find "rg"))
-    (setq projectile-generic-command
-          (let ((rg-cmd ""))
-            (dolist (dir projectile-globally-ignored-directories)
-              (setq rg-cmd (format "%s --glob '!%s'" rg-cmd dir)))
-            (concat "rg -0 --files --color=never --hidden" rg-cmd))))
+    ;; Use the faster searcher to handle project files: ripgrep `rg'.
+    (when (and (not (executable-find "fd"))
+            (executable-find "rg"))
+      (setq projectile-generic-command
+        (let ((rg-cmd ""))
+          (dolist (dir projectile-globally-ignored-directories)
+            (setq rg-cmd (format "%s --glob '!%s'" rg-cmd dir)))
+          (concat "rg -0 --files --color=never --hidden" rg-cmd))))
 
-  ;; Support Perforce project
-  (let ((val (or (getenv "P4CONFIG") ".p4config")))
-    (add-to-list 'projectile-project-root-files-bottom-up val)))
+    ;; Support Perforce project
+    (let ((val (or (getenv "P4CONFIG") ".p4config")))
+      (add-to-list 'projectile-project-root-files-bottom-up val)))
 
+  )
+(defun my/ergoemacs ()
+  "Ergoemacs."
+  (interactive "P")
+  ;; ergoemacs keys
+  (use-package ergoemacs-mode)
+  (use-package ergoemacs-status)
+  ;;ergoemacs-mode
+  (setq ergoemacs-theme "standard") ;; Uses Standard Ergoemacs keyboard theme
+  (setq ergoemacs-keyboard-layout "pt-nativo") ;; Assumes QWERTY keyboard layout
+  (ergoemacs-mode 1)
   )
 (defun my/indent2spcs ()
   "2 spaces indent."
@@ -1268,10 +1363,6 @@
             (iedit-mode-end . symbol-overlay-mode))
     :init (setq symbol-overlay-idle-time 0.01))
 
-  ;; Highlight brackets according to their depth
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
-
   ;; Highlight TODO and similar keywords in comments and strings
   (use-package hl-todo
     :bind (:map hl-todo-mode-map
@@ -1321,7 +1412,30 @@
         (setq linum-highlight-in-all-buffersp t))))
 
   )
-
+(defun my/rainbow ()
+  "Rainbow mode."
+  (interactive)
+  ;;(use-package rainbow-mode)
+  ;; Highlight brackets according to their depth
+  (use-package rainbow-delimiters
+    :defer 5
+    :hook
+    (prog-mode . rainbow-delimiters-mode)
+    :config
+    (rainbow-delimiters-mode +1)
+    (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+      :foreground 'unspecified
+      :inherit 'error))
+  )
+(defun my/wrap ()
+  "adaptive-wrap."
+  (interactive)
+  (use-package adaptive-wrap)
+  ;; Adaptive wrap anyways needs the `visual-line-mode' to be enabled. So
+  ;; enable it only when the latter is enabled.
+  (add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+  (global-visual-line-mode 1)
+  )
 (defun my/window()
   "define my window"
   (my/cursor)
@@ -1335,8 +1449,9 @@
 ;; show the parens
 (show-paren-mode 1)
 
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-(add-hook 'prog-mode-hook #'rainbow-mode)
+(setq inhibit-startup-screen 1)
+(setq initial-scratch-message nil)
+(setq initial-major-mode 'text-mode)
 
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1358,52 +1473,48 @@
 (my/linenumbers)
 (my/window)
 (my/highlight)
+
 (my/indent2spcs)
 (my/cpp)
+(my/ruby)
 (my/python)
+(my/sh)
+(my/lsp)
 (my/company)
 (my/git)
 (my/ivy)
+(my/spaceline)
+;;;; The following may
+;;;; not work on termux
+(my/rainbow)
+(my/ergoemacs)
+(my/rainbow)
+(my/wrap)
 (my/projectile)
-(add-hook 'after-change-major-mode-hook 'my/window)
 
-;;ergoemacs-mode
-(setq ergoemacs-theme "standard") ;; Uses Standard Ergoemacs keyboard theme
-(setq ergoemacs-keyboard-layout "pt-nativo") ;; Assumes QWERTY keyboard layout
-;;(ergoemacs-mode 1)
+(add-hook 'after-change-major-mode-hook 'my/window)
 
 ;; mouse support
 (xterm-mouse-mode 1)
 ;; auto-save 1 minute
 (setq auto-save-timeout 120)
 (setq make-backup-files nil)     ; stop creating backup~ files
-;;(setq auto-save-default nil)     ; stop creating #autosave# files
+(setq auto-save-default nil)     ; stop creating #autosave# files
 
 ;; We don't want to type yes and no all the time so, do y and n
+(setq create-lockfiles nil)
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 ;; keep custom setting in external file
 (setq-default custom-file "~/.emacs.d/custom.el")
 (load custom-file 'noerror)
 
-(setq inhibit-startup-screen 1)
-(setq initial-scratch-message nil)
-(setq initial-major-mode 'text-mode)
-
 (with-eval-after-load 'yasnippet
   (setq yas-prompt-functions
     '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
-
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
 ;; (load-theme 'monokai)
 
-;; last lines
-(global-hl-line-mode 1)
-;; Adaptive wrap anyways needs the `visual-line-mode' to be enabled. So
-;; enable it only when the latter is enabled.
-(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
-(global-visual-line-mode 1)
-
-(my/spaceline)
 (provide 'init)
 ;;; init.el ends here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
