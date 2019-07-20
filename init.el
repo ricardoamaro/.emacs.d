@@ -1144,8 +1144,8 @@
   (global-diff-hl-mode 1)
   ;; (diff-hl-flydiff-mode 1)
   ;; (diff-hl-margin-minor-mode 1)
-  (setq-default left-fringe-width  5)
-  (setq-default right-fringe-width 5)
+  (setq-default left-fringe-width  3)
+  (setq-default right-fringe-width 3)
   (fringe-mode '( 3 . 3))
   ;; (setq-default linum-format " %2d " )
   (load-library "magit")
@@ -1200,9 +1200,7 @@
       '(gfm-mode all-the-icons-octicon "markdown" :face all-the-icons-blue)))
   ;; enable spaceline
   (use-package spaceline)
-  (use-package spaceline-config)
-  (spaceline-spacemacs-theme)
-  (spaceline-compile)
+  (require 'spaceline-config)
   (use-package spaceline-all-the-icons
     :after spaceline  ; eval-after-load doesn't work for this setup
     :config (progn
@@ -1230,6 +1228,10 @@
               (spaceline-toggle-all-the-icons-time-on)
               (spaceline-toggle-all-the-icons-battery-status-off)
               (spaceline-toggle-hud-off)))
+  (spaceline-spacemacs-theme)
+  ;;(spaceline-emacs-theme)
+  ;;(spaceline-all-the-icons-theme)
+  ;;(spaceline-compile)
   )
 (defun my/projectile()
   "make sure projectile is configured correctly"
@@ -1473,7 +1475,6 @@
 (my/linenumbers)
 (my/window)
 (my/highlight)
-
 (my/indent2spcs)
 (my/cpp)
 (my/ruby)
@@ -1487,11 +1488,9 @@
 ;;;; The following may
 ;;;; not work on termux
 (my/rainbow)
-(my/ergoemacs)
-(my/rainbow)
+;;(my/ergoemacs)
 (my/wrap)
 (my/projectile)
-
 (add-hook 'after-change-major-mode-hook 'my/window)
 
 ;; mouse support
@@ -1500,10 +1499,9 @@
 (setq auto-save-timeout 120)
 (setq make-backup-files nil)     ; stop creating backup~ files
 (setq auto-save-default nil)     ; stop creating #autosave# files
-
-;; We don't want to type yes and no all the time so, do y and n
 (setq create-lockfiles nil)
 
+;; We don't want to type yes and no all the time so, do y and n
 (defalias 'yes-or-no-p 'y-or-n-p)
 ;; keep custom setting in external file
 (setq-default custom-file "~/.emacs.d/custom.el")
