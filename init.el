@@ -14,12 +14,13 @@
   '(;; generally useful packages
      ;; evil
      ;; evil-leader
+     ;lsp-mode
      company
      company-jedi company-anaconda company-irony company-tern
      company-rtags company-irony company-irony-c-headers
-     company-php company-shell company-web
-     company-lsp ;; company-box ;; company-box > 26
-     lsp-mode lsp-ruby lsp-python lsp-sh lsp-ui
+     ;company-php company-shell company-web
+     ;company-lsp ;; company-box ;; company-box > 26
+      ;lsp-ruby lsp-python lsp-sh lsp-ui
      cmake-ide
      sh-script
      lua-mode
@@ -31,9 +32,9 @@
      ;;helm helm-company helm-flyspell helm-rtags helm-gtags helm-projectile
      ;; projectile
      flycheck flycheck-pos-tip flycheck-irony flycheck-rtags
-     rainbow-mode rainbow-delimiters
+     ;rainbow-mode rainbow-delimiters
      paren symbol-overlay hl-line
-     mode-icons all-the-icons-dired all-the-icons xpm
+     mode-icons all-the-icons-dired all-the-icons ;xpm
      spaceline spaceline-all-the-icons
      centaur-tabs ;; tabbar-ruler
      ;;highlight-thing
@@ -56,12 +57,12 @@
      quickrun
      dumb-jump
      ;; visual
-     adaptive-wrap
+     ;adaptive-wrap
      column-enforce-mode
      ;; org md
      markdown-mode
      ;; ergoemacs keys
-     ergoemacs-mode ergoemacs-status
+     ;ergoemacs-mode ergoemacs-status
      ;; themes
      dracula-theme leuven-theme
      monokai-theme darkokai-theme
@@ -71,18 +72,20 @@
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 (add-to-list 'package-archives
-  '("gnu" . "https://elpa.gnu.org/packages/") t)
-(add-to-list 'package-archives
   '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives
   '("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives
   '("org" . "https://orgmode.org/elpa/") t)
+(add-to-list 'package-archives
+  '("gnu" . "https://elpa.gnu.org/packages/") t)
+
+(setq package-check-signature nil)
 
 (defconst d/emacs-start-time (current-time))
 ;; propose using external TLS
-(if (fboundp 'gnutls-available-p)
-  (fmakunbound 'gnutls-available-p))
+;;(if (fboundp 'gnutls-available-p)
+;;  (fmakunbound 'gnutls-available-p))
 
 ;; Activate all the packages (in particular autoloads)
 (package-initialize)
@@ -1272,8 +1275,8 @@
     :init (setq symbol-overlay-idle-time 0.01))
 
   ;; Highlight brackets according to their depth
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
+  ;(use-package rainbow-delimiters
+  ;  :hook (prog-mode . rainbow-delimiters-mode))
 
   ;; Highlight TODO and similar keywords in comments and strings
   (use-package hl-todo
@@ -1338,8 +1341,8 @@
 ;; show the parens
 (show-paren-mode 1)
 
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-(add-hook 'prog-mode-hook #'rainbow-mode)
+;(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+;(add-hook 'prog-mode-hook #'rainbow-mode)
 
 ;;; Final Configs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1367,7 +1370,7 @@
 (my/company)
 (my/git)
 (my/ivy)
-(my/projectile)
+;(my/projectile)
 (add-hook 'after-change-major-mode-hook 'my/window)
 
 ;;ergoemacs-mode
@@ -1403,10 +1406,10 @@
 (global-hl-line-mode 1)
 ;; Adaptive wrap anyways needs the `visual-line-mode' to be enabled. So
 ;; enable it only when the latter is enabled.
-(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
+;(add-hook 'visual-line-mode-hook #'adaptive-wrap-prefix-mode)
 (global-visual-line-mode 1)
 
-(my/spaceline)
+;;(my/spaceline)
 (provide 'init)
 ;;; init.el ends here
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
