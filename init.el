@@ -80,19 +80,7 @@
 (dolist (package my-packages)
   (unless (package-installed-p package)
     (package-install package)))
-;; Check for errors
-(require 'flycheck)
-(global-flycheck-mode 1)
-(flycheck-pos-tip-mode 1)
-(use-package flycheck-pos-tip
-  :defines flycheck-pos-tip-timeout
-  :hook (global-flycheck-mode . flycheck-pos-tip-mode)
-  :config (setq flycheck-pos-tip-timeout 30))
-(flycheck-pos-tip-mode 1) ;; (flycheck-popup-tip-mode -1)
-;; enable yasnippet
-(require 'yasnippet)
-(yas-global-mode 1)
-(yas-reload-all)
+
 ;; With use-package:
 ;;(use-package company-box
 ;;  :hook (company-mode . company-box-mode))
@@ -1417,7 +1405,7 @@
 (defun my/rainbow ()
   "Rainbow mode."
   (interactive)
-  ;;(use-package rainbow-mode)
+  (use-package rainbow-mode)
   ;; Highlight brackets according to their depth
   (use-package rainbow-delimiters
     :defer 5
@@ -1499,13 +1487,28 @@
 (setq auto-save-timeout 120)
 (setq make-backup-files nil)     ; stop creating backup~ files
 (setq auto-save-default nil)     ; stop creating #autosave# files
-(setq create-lockfiles nil)
+(setq create-lockfiles nil)      ; stop creating lock files
 
 ;; We don't want to type yes and no all the time so, do y and n
 (defalias 'yes-or-no-p 'y-or-n-p)
 ;; keep custom setting in external file
 (setq-default custom-file "~/.emacs.d/custom.el")
 (load custom-file 'noerror)
+
+;; Check for errors
+(require 'flycheck)
+(global-flycheck-mode 1)
+(flycheck-pos-tip-mode 1)
+(use-package flycheck-pos-tip
+  :defines flycheck-pos-tip-timeout
+  :hook (global-flycheck-mode . flycheck-pos-tip-mode)
+  :config (setq flycheck-pos-tip-timeout 30))
+(flycheck-pos-tip-mode 1) ;; (flycheck-popup-tip-mode -1)
+;; enable yasnippet
+(require 'yasnippet)
+(yas-global-mode 1)
+(yas-reload-all)
+(add-hook 'prog-mode-hook #'yas-minor-mode)
 
 (with-eval-after-load 'yasnippet
   (setq yas-prompt-functions
