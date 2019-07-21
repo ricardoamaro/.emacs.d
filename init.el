@@ -51,7 +51,7 @@
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 
- (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
 (add-to-list 'package-archives
   '("gnu" . "https://elpa.gnu.org/packages/") t)
@@ -886,10 +886,8 @@
   (global-set-key (kbd "<C-dead-acute>")
     (lambda ()(interactive) (hs-minor-mode 1) (hs-show-all)))
   ;; auto-complete
-  (with-eval-after-load 'yasnippet
-    (global-set-key (kbd "C-."  ) 'company-complete)
-    (global-set-key (kbd "C-,"  ) 'company-yasnippet)
-    )
+  (global-set-key (kbd "C-."  ) 'company-complete)
+  (global-set-key (kbd "C-,"  ) 'company-yasnippet)
 
   ;; Setting SHIFT+arrow keys to select text
   (global-unset-key (vector (list 'shift 'left)))
@@ -1079,10 +1077,15 @@
   (add-hook 'after-init-hook 'global-company-mode)
   (setq company-idle-delay 0.8)
   (setq company-minimum-prefix-length 2)
-  (eval-after-load 'company
-    '(progn
-       (define-key company-mode-map (kbd "C-:") 'helm-company)
-       (define-key company-active-map (kbd "C-:") 'helm-company)))
+
+  (setq company-backends
+    '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic
+        company-files company-ac-php-backend company-elisp company-inf-ruby
+        company-anaconda company-robe company-gtags company-rtags company-irony-c-headers
+        company-web company-web-html company-web-jade company-web-slim company-go
+        company-irony company-clang company-keywords company-cmake company-css
+        company-lsp company-yasnippet)
+       (company-dabbrev company-dabbrev-code)))
 
   ;; python specific stuff
   (require 'company-jedi)
