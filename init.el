@@ -95,12 +95,21 @@
   (toggle-scroll-bar -1)
   (tool-bar-mode -1))
 
+
+;; (setq company-backends '(( company-lsp company-yasnippet company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic company-files company-ac-php-backend company-elisp company-inf-ruby company-anaconda company-robe company-gtags company-rtags company-irony-c-headers company-web company-web-html company-web-jade company-web-slim company-go company-irony company-clang company-keywords company-cmake company-css
+;;                            )
+;;                           (company-dabbrev company-dabbrev-code))
+;;   )
+
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/lsp ()
   "Load lsp-mode."
   (interactive)
   (use-package lsp-mode
     :hook (prog-mode . lsp-deferred)
+    :config
+    ;; Disable readline based native completion
+    (setq company-lsp-cache-candidates 'auto)
     :commands (lsp lsp-deferred))
   ;; optionally
   (use-package lsp-ui :commands lsp-ui-mode)
@@ -113,6 +122,7 @@
   (use-package lsp-ruby)
   (use-package lsp-python)
   (use-package lsp-sh)
+  ;;(push 'company-lsp company-backends)
   )
 (defun my/ruby ()
   "Load my Ruby configs."
@@ -128,8 +138,8 @@
       :hook (ruby-mode . ruby-refactor-mode-launch))
 
     (use-package robe)
-    (eval-after-load 'company
-      '(push 'company-robe company-backends))
+    ;;    (eval-after-load 'company
+    ;;      '(push 'company-robe company-backends))
 
     (use-package rvm)
     (rvm-use-default) ;; use rvm's default ruby for the current Emacs session
@@ -174,8 +184,7 @@
 
   ;; YAML mode
   (use-package yaml-mode)
-
-
+  ;;  (push 'company-robe company-backends)
   )
 (defun my/python ()
   ;; various settings for Jedi
@@ -204,6 +213,7 @@
 
     ;; python related packages
     (use-package pytest)
+    (use-package jedi-core)
     (use-package jedi)
     (add-hook 'python-mode-hook 'jedi:setup)
     (setq
@@ -212,6 +222,8 @@
       py-electric-colon-active t
       py-smart-indentation t)
     )
+
+
   )
 (defun my/sh ()
   "My SH packages and configs."
@@ -957,8 +969,6 @@
             ("C-p" . company-select-previous)
             ("C-n" . company-select-next))
     :hook (after-init . global-company-mode)
-    :config
-    (setq company-backends '(( company-yasnippet)))
     :init
     (defun my-company-yasnippet ()
       (interactive)
@@ -1078,17 +1088,20 @@
   (setq company-idle-delay 0.8)
   (setq company-minimum-prefix-length 2)
 
-  (setq company-backends
-    '((company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic
-        company-files company-ac-php-backend company-elisp company-inf-ruby
-        company-anaconda company-robe company-gtags company-rtags company-irony-c-headers
-        company-web company-web-html company-web-jade company-web-slim company-go
-        company-irony company-clang company-keywords company-cmake company-css
-        company-lsp company-yasnippet)
-       (company-dabbrev company-dabbrev-code)))
-
   ;; python specific stuff
   (require 'company-jedi)
+
+  ;; Prog enable autocomplete+ snippets
+  (add-hook 'prog-mode-hook
+    (lambda ()
+      (unless (derived-mode-p 'python-mode)
+        (add-to-list 'company-backends '(company-lsp :with company-yasnippet)))))
+
+  ;; Python enable autocomplete+ snippets
+  (add-hook 'python-mode-hook
+    (lambda()
+      (add-to-list 'company-backends '(company-jedi :with company-yasnippet))))
+
   )
 (defun my/git()
   "My git configs."
@@ -1513,12 +1526,38 @@
 ;; enable yasnippet
 (require 'yasnippet)
 (yas-global-mode 1)
-(yas-reload-all)
-(add-hook 'prog-mode-hook #'yas-minor-mode)
+;; (yas-reload-all)
+;; (add-hook 'prog-mode-hook #'yas-minor-mode)
 
-(with-eval-after-load 'yasnippet
-  (setq yas-prompt-functions
-    '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
+;; (with-eval-after-load 'yasnippet
+;;   (setq yas-prompt-functions
+;;     '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
+
+;; (defun check-expansion ()
+;;   (save-excursion
+;;     (if (looking-at "\\_>") t
+;;       (backward-char 1)
+;;       (if (looking-at "\\.") t
+;;         (backward-char 1)
+;;         (if (looking-at "->") t nil)))))
+
+;; (defun do-yas-expand ()
+;;   (let ((yas/fallback-behavior 'return-nil))
+;;     (yas/expand)))
+
+;; (defun tab-indent-or-complete ()
+;;   (interactive)
+;;   (if (minibufferp)
+;;     (minibuffer-complete)
+;;     (if (or (not yas/minor-mode)
+;;           (null (do-yas-expand)))
+;;       (if (check-expansion)
+;;         (company-complete-common)
+;;         (indent-for-tab-command)))))
+
+;; (global-set-key [tab] 'tab-indent-or-complete)
+
+
 ;; Load my theme noctilux-theme dracula-theme or monokai-theme
 ;; (load-theme 'monokai)
 
