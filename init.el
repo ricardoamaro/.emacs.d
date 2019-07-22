@@ -1101,7 +1101,6 @@
   (add-hook 'python-mode-hook
     (lambda()
       (add-to-list 'company-backends '(company-jedi :with company-yasnippet))))
-
   )
 (defun my/git()
   "My git configs."
@@ -1450,6 +1449,60 @@
   (my/cursor)
   (my/tabs)
   (my/keys))
+(defun my/ui ()
+  "some ui options."
+  (interactive)
+
+  ;; mouse support
+  (xterm-mouse-mode 1)
+  ;; auto-save 1 minute
+  (setq auto-save-timeout 120)
+  (setq make-backup-files nil)     ; stop creating backup~ files
+  (setq auto-save-default nil)     ; stop creating #autosave# files
+  (setq create-lockfiles nil)      ; stop creating lock files
+
+  ;; We don't want to type yes and no all the time so, do y and n
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  ;; (setq initial-scratch-message nil)
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets) ; Show path if names are same
+  (setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
+  (setq adaptive-fill-first-line-regexp "^* *$")
+  (setq delete-by-moving-to-trash t)         ; Deleting files go to OS's trash folder
+  (setq set-mark-command-repeat-pop t)       ; Repeating C-SPC after popping mark pops it again
+  ;; (setq-default kill-whole-line t)           ; Kill line including '\n'
+
+  (setq-default major-mode 'text-mode)
+
+  ;; Delete selection if you insert
+  (use-package delsel
+    :ensure nil
+    :hook (after-init . delete-selection-mode))
+
+  ;; Rectangle
+  (use-package rect
+    :ensure nil
+    :bind (("<C-return>" . rectangle-mark-mode)))
+
+  ;; Automatically reload files was modified by external program
+  (use-package autorevert
+    :ensure nil
+    :diminish
+    :hook (after-init . global-auto-revert-mode))
+
+  ;; Click to browse URL or to send to e-mail address
+  (use-package goto-addr
+    :ensure nil
+    :hook ((text-mode . goto-address-mode)
+            (prog-mode . goto-address-prog-mode)))
+
+  ;; Automatic parenthesis pairing
+  (use-package elec-pair
+    :ensure nil
+    :hook (after-init . electric-pair-mode)
+    :init (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit))
+
+  )
 
 ;;; End Custom functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1496,20 +1549,12 @@
 ;;;; not work on termux
 (my/rainbow)
 ;;(my/ergoemacs)
+(my/ui)
 (my/wrap)
 (my/projectile)
 (add-hook 'after-change-major-mode-hook 'my/window)
 
-;; mouse support
-(xterm-mouse-mode 1)
-;; auto-save 1 minute
-(setq auto-save-timeout 120)
-(setq make-backup-files nil)     ; stop creating backup~ files
-(setq auto-save-default nil)     ; stop creating #autosave# files
-(setq create-lockfiles nil)      ; stop creating lock files
 
-;; We don't want to type yes and no all the time so, do y and n
-(defalias 'yes-or-no-p 'y-or-n-p)
 ;; keep custom setting in external file
 (setq-default custom-file "~/.emacs.d/custom.el")
 (load custom-file 'noerror)
