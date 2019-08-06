@@ -889,6 +889,8 @@
   (setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
 
   ;; hideshow folds of code keys
+  (add-hook 'prog-mode-hook #'hs-minor-mode)
+  
   (defun toggle-fold() (interactive)
     (save-excursion (end-of-line) (hs-toggle-hiding)))
   (global-set-key (kbd "<C-tab>")
