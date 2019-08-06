@@ -1418,7 +1418,7 @@
                               ))))
         :init
         (setq linum-highlight-in-all-buffersp t))))
-
+  (global-display-line-numbers-mode 1)
   )
 (defun my/rainbow ()
   "Rainbow mode."
