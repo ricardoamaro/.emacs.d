@@ -51,7 +51,7 @@
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+;;(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
 (add-to-list 'package-archives
   '("gnu" . "https://elpa.gnu.org/packages/") t)
@@ -79,27 +79,29 @@
   (setq use-package-always-defer t)
   (setq use-package-expand-minimally t)
   (setq use-package-enable-imenu-support t))
+;; Lets us use asynchronous processes wherever possible, pretty useful.
+(use-package async
+  :ensure t
+  :init (dired-async-mode 1)
+  (async-bytecomp-package-mode 1)
+  )
 ;; Install all missing packages
 (dolist (package my-packages)
   (unless (package-installed-p package)
-    (package-install package)))
+    (use-package package :defer t)))
 
 ;; With use-package:
 ;;(use-package company-box
 ;;  :hook (company-mode . company-box-mode))
-(load-theme 'monokai t)
+(use-package  monokai-theme
+:init
+(load-theme 'monokai t))
 ;; To disable the menu bar
 (menu-bar-mode -1)
 ;; on X disable scollbar and toobar
 (when (display-graphic-p)
   (toggle-scroll-bar -1)
   (tool-bar-mode -1))
-
-
-;; (setq company-backends '(( company-lsp company-yasnippet company-shell company-jedi company-capf enh-ruby-mode ruby-mode company-semantic company-files company-ac-php-backend company-elisp company-inf-ruby company-anaconda company-robe company-gtags company-rtags company-irony-c-headers company-web company-web-html company-web-jade company-web-slim company-go company-irony company-clang company-keywords company-cmake company-css
-;;                            )
-;;                           (company-dabbrev company-dabbrev-code))
-;;   )
 
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/lsp ()
@@ -111,9 +113,42 @@
     ;; Disable readline based native completion
     (setq company-lsp-cache-candidates 'auto)
     :commands (lsp lsp-deferred))
+  (use-package lsp-ui
+    :ensure t
+    :after lsp-mode
+    :config
+    :init (setq lsp-ui-doc-enable t
+            lsp-ui-doc-use-webkit nil
+            lsp-ui-doc-delay 0.5
+            lsp-ui-doc-include-signature t
+            lsp-ui-doc-use-childframe t
+            lsp-ui-doc-position 'top
+            lsp-eldoc-enable-hover t
+            lsp-ui-doc-border (face-foreground 'default)
+            lsp-ui-flycheck-enable t
+            lsp-ui-flycheck-list-position 'right
+            lsp-ui-flycheck-live-reporting t
+            lsp-ui-peek-enable t
+            lsp-ui-peek-list-width 60
+            lsp-ui-peek-peek-height 25
+            lsp-ui-sideline-enable t
+            lsp-ui-sideline-ignore-duplicate t
+            ;;lsp-ui-sideline-show-diagnostics nil
+            ;;lsp-ui-sideline-show-hover nil
+            )
+    (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+  (use-package company-lsp
+    :ensure t
+    :after (lsp-mode company)
+    :config
+    (setq company-idle-delay 0.3)
+    (global-company-mode 1)
+    (push 'company-lsp company-backends)
+    :custom
+    (company-lsp-async t)
+    (company-lsp-enable-snippet t))
   ;; optionally
-  (use-package lsp-ui :commands lsp-ui-mode)
-  (use-package company-lsp :commands company-lsp)
   (use-package helm-lsp :commands helm-lsp-workspace-symbol)
   (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
   ;; optionally if you want to use debugger
@@ -122,7 +157,34 @@
   (use-package lsp-ruby)
   (use-package lsp-python)
   (use-package lsp-sh)
-  ;;(push 'company-lsp company-backends)
+  (add-hook 'c++-mode-hook #'lsp-deferred)
+  (add-hook 'python-mode-hook #'lsp-deferred)
+  (add-hook 'ruby-mode-hook #'lsp-deferred)
+  (add-hook 'php-mode-hook #'lsp-deferred)
+  )
+(defun my/php ()
+  "Start php"
+  (interactive)
+  (use-package php-mode
+    :ensure t
+    :config
+    ;; indent -> calls next line like symfony2
+    (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style)
+    ;; aline -> on successive lines
+    (setq php-lineup-cascaded-calls t)
+    ;; don't use things only needed for html (my files are php only)
+    (setq php-template-compatibility nil))
+
+  ;; lsp https://github.com/emacs-lsp/lsp-php
+  (use-package lsp-php
+    :after (php-mode lsp-mode)
+    :ensure t
+    :config
+    (add-hook 'php-mode-hook #'lsp-php-enable)
+    (custom-set-variables
+      ;; Composer.json detection after Projectile.
+      '(lsp-php-workspace-root-detectors (quote (lsp-php-root-projectile lsp-php-root-composer-json "index.php" "robots.txt")))
+      ))
   )
 (defun my/ruby ()
   "Load my Ruby configs."
@@ -236,8 +298,8 @@
   "Setup cmake-ide & rtags."
   (interactive)
   ;; Load rtags and start the cmake-ide-setup process
-  (require 'rtags)
-  (require 'cmake-ide)
+  (use-package rtags)
+  (use-package cmake-ide)
   (cmake-ide-setup)
   ;; Set cmake-ide-flags-c++ to use C++11
   (setq cmake-ide-flags-c++ (append '("-std=c++11")))
@@ -250,7 +312,11 @@
   (rtags-diagnostics)
   (setq rtags-completions-enabled t)
   (rtags-enable-standard-keybindings)
-  (yas-global-mode 1)
+  (use-package cc-mode
+  :config
+  (use-package modern-cpp-font-lock
+    :diminish
+    :init (modern-c++-font-lock-global-mode t)))
 
   (with-eval-after-load "projectile"
     (push '("cc" "h") projectile-other-file-alist)
@@ -890,7 +956,7 @@
 
   ;; hideshow folds of code keys
   (add-hook 'prog-mode-hook #'hs-minor-mode)
-  
+
   (defun toggle-fold() (interactive)
     (save-excursion (end-of-line) (hs-toggle-hiding)))
   (global-set-key (kbd "<C-tab>")
@@ -972,6 +1038,9 @@
             ("C-n" . company-select-next))
     :hook (after-init . global-company-mode)
     :init
+    ;; enable yasnippet
+    (use-package yasnippet)
+    (yas-global-mode 1)
     (defun my-company-yasnippet ()
       (interactive)
       (company-abort)
@@ -1085,14 +1154,13 @@
         :init (setq company-quickhelp-delay 0.5))))
 
   (global-company-mode t)
-  (global-auto-complete-mode t)
+  ;;(global-auto-complete-mode t)
   (add-hook 'after-init-hook 'global-company-mode)
   (setq company-idle-delay 0.8)
   (setq company-minimum-prefix-length 2)
 
   ;; python specific stuff
-  (require 'company-jedi)
-
+  (use-package company-jedi)
   ;; Prog enable autocomplete+ snippets
   (add-hook 'prog-mode-hook
     (lambda ()
@@ -1538,11 +1606,12 @@
 (my/window)
 (my/highlight)
 (my/indent2spcs)
+(my/lsp)
 (my/cpp)
+(my/php)
 (my/ruby)
 (my/python)
 (my/sh)
-(my/lsp)
 (my/company)
 (my/git)
 (my/ivy)
@@ -1562,51 +1631,13 @@
 (load custom-file 'noerror)
 
 ;; Check for errors
-(require 'flycheck)
-(global-flycheck-mode 1)
-(flycheck-pos-tip-mode 1)
+(use-package flycheck)
 (use-package flycheck-pos-tip
   :defines flycheck-pos-tip-timeout
   :hook (global-flycheck-mode . flycheck-pos-tip-mode)
   :config (setq flycheck-pos-tip-timeout 30))
-(flycheck-pos-tip-mode 1) ;; (flycheck-popup-tip-mode -1)
-;; enable yasnippet
-(require 'yasnippet)
-(yas-global-mode 1)
-;; (yas-reload-all)
-;; (add-hook 'prog-mode-hook #'yas-minor-mode)
-
-;; (with-eval-after-load 'yasnippet
-;;   (setq yas-prompt-functions
-;;     '(yas-x-prompt yas-dropdown-prompt yas-completing-prompt)))
-
-;; (defun check-expansion ()
-;;   (save-excursion
-;;     (if (looking-at "\\_>") t
-;;       (backward-char 1)
-;;       (if (looking-at "\\.") t
-;;         (backward-char 1)
-;;         (if (looking-at "->") t nil)))))
-
-;; (defun do-yas-expand ()
-;;   (let ((yas/fallback-behavior 'return-nil))
-;;     (yas/expand)))
-
-;; (defun tab-indent-or-complete ()
-;;   (interactive)
-;;   (if (minibufferp)
-;;     (minibuffer-complete)
-;;     (if (or (not yas/minor-mode)
-;;           (null (do-yas-expand)))
-;;       (if (check-expansion)
-;;         (company-complete-common)
-;;         (indent-for-tab-command)))))
-
-;; (global-set-key [tab] 'tab-indent-or-complete)
-
-
-;; Load my theme noctilux-theme dracula-theme or monokai-theme
-;; (load-theme 'monokai)
+(global-flycheck-mode 1)
+(flycheck-pos-tip-mode 1)
 
 (provide 'init)
 ;;; init.el ends here
