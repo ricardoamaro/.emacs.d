@@ -46,21 +46,28 @@
      dracula-theme leuven-theme
      monokai-theme darkokai-theme
      ;;base16-theme
-     yasnippet yasnippet-snippets auto-yasnippet)
-  )
+     yasnippet yasnippet-snippets auto-yasnippet
+     helm-lsp
+     lsp-treemacs
+     dap-mode
+     lsp-ruby
+     lsp-python
+     lsp-sh
+     )
+)
 ;; Add Melpa as the default Emacs Package repository
 ;; only contains a very limited number of packages
 
 ;;(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
 (add-to-list 'package-archives
-  '("gnu" . "https://elpa.gnu.org/packages/") t)
+  '("gnu" . "http://elpa.gnu.org/packages/") t)
 (add-to-list 'package-archives
-  '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 (add-to-list 'package-archives
-  '("melpa" . "https://melpa.org/packages/") t)
+  '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives
-  '("org" . "https://orgmode.org/elpa/") t)
+  '("org" . "http://orgmode.org/elpa/") t)
 
 (defconst d/emacs-start-time (current-time))
 
@@ -161,7 +168,7 @@
     :custom
     (company-lsp-async t)
     (company-lsp-enable-snippet t)
-    ;;(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+    (use-package helm-lsp :commands helm-lsp-workspace-symbol)
     (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
     ;; optionally if you want to use debugger
     (use-package dap-mode)
