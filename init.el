@@ -105,26 +105,38 @@
 
 ;;; Custom Functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my/lsp ()
-  "Load lsp-mode."
+  "base configs for lsp"
   (interactive)
   (use-package lsp-mode
-    :hook (prog-mode . lsp-deferred)
+    ;; :ensure t
+    :diminish lsp-mode
+    ;;:hook (prog-mode . lsp-deferred)
+    :bind (:map lsp-mode-map
+            ("C-c C-d" . lsp-describe-thing-at-point))
+    :init (setq lsp-auto-guess-root t       ; Detect project root
+            lsp-prefer-flymake nil          ; Use lsp-ui and flycheck
+            flymake-fringe-indicator-position 'right-fringe)
     :config
-    ;; Disable readline based native completion
-    (setq company-lsp-cache-candidates 'auto)
-    :commands (lsp lsp-deferred))
+    (setq lsp-enable-snippet t)
+    (setq lsp-response-timeout 25)
+    (setq lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
+    :custom
+    (lsp-enable-flycheck t)
+    (lsp-enable-eldoc t)
+    (lsp-enable-completion-at-point t))
+
   (use-package lsp-ui
     :ensure t
     :after lsp-mode
     :config
     :init (setq lsp-ui-doc-enable t
-            lsp-ui-doc-use-webkit nil
-            lsp-ui-doc-delay 0.5
-            lsp-ui-doc-include-signature t
-            lsp-ui-doc-use-childframe t
-            lsp-ui-doc-position 'top
+            ;;lsp-ui-doc-use-webkit nil
             lsp-eldoc-enable-hover t
+            lsp-ui-doc-alignment 'window
             lsp-ui-doc-border (face-foreground 'default)
+            lsp-ui-doc-include-signature t
+            lsp-ui-doc-position 'top
+            lsp-ui-doc-use-childframe t
             lsp-ui-flycheck-enable t
             lsp-ui-flycheck-list-position 'right
             lsp-ui-flycheck-live-reporting t
@@ -133,6 +145,7 @@
             lsp-ui-peek-peek-height 25
             lsp-ui-sideline-enable t
             lsp-ui-sideline-ignore-duplicate t
+            lsp-ui-doc-delay 0.5
             ;;lsp-ui-sideline-show-diagnostics nil
             ;;lsp-ui-sideline-show-hover nil
             )
@@ -144,24 +157,24 @@
     :config
     (setq company-idle-delay 0.3)
     (global-company-mode 1)
-    (push 'company-lsp company-backends)
+    (push '(company-lsp :with company-yasnippet) company-backends)
     :custom
     (company-lsp-async t)
-    (company-lsp-enable-snippet t))
-  ;; optionally
-  (use-package helm-lsp :commands helm-lsp-workspace-symbol)
-  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-  ;; optionally if you want to use debugger
-  (use-package dap-mode)
-  ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-  (use-package lsp-ruby)
-  (use-package lsp-python)
-  (use-package lsp-sh)
-  (add-hook 'c++-mode-hook #'lsp-deferred)
-  (add-hook 'python-mode-hook #'lsp-deferred)
-  (add-hook 'ruby-mode-hook #'lsp-deferred)
-  (add-hook 'php-mode-hook #'lsp-deferred)
+    (company-lsp-enable-snippet t)
+    (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+    (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+    ;; optionally if you want to use debugger
+    (use-package dap-mode)
+    ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+    (use-package lsp-ruby)
+    (use-package lsp-python)
+    (use-package lsp-sh)
+    (add-hook 'c++-mode-hook #'lsp-deferred)
+    (add-hook 'python-mode-hook #'lsp-deferred)
+    (add-hook 'ruby-mode-hook #'lsp-deferred)
+    (add-hook 'php-mode-hook #'lsp-deferred))
   )
+
 (defun my/php ()
   "Start php"
   (interactive)
@@ -966,8 +979,12 @@
   (global-set-key (kbd "<C-dead-acute>")
     (lambda ()(interactive) (hs-minor-mode 1) (hs-show-all)))
   ;; auto-complete
-  (global-set-key (kbd "C-."  ) 'company-complete)
-  (global-set-key (kbd "C-,"  ) 'company-yasnippet)
+  (with-eval-after-load 'yasnippet
+    (global-set-key (kbd "C-."  ) 'completion-at-point)
+    (global-set-key (kbd "C-,"  ) 'company-yasnippet)
+    (global-set-key (kbd "<backtab>"  ) 'company-yasnippet)
+    (global-set-key (kbd "<M-tab>"  ) 'company-complete)
+    )
 
   ;; Setting SHIFT+arrow keys to select text
   (global-unset-key (vector (list 'shift 'left)))
