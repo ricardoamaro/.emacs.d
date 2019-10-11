@@ -161,7 +161,7 @@
     :custom
     (company-lsp-async t)
     (company-lsp-enable-snippet t)
-    (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+    ;;(use-package helm-lsp :commands helm-lsp-workspace-symbol)
     (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
     ;; optionally if you want to use debugger
     (use-package dap-mode)
